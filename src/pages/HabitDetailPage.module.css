@@ -1,0 +1,98 @@
+.heatCard {
+  padding: 16px 14px 13px;
+  margin-top: 4px;
+}
+
+.goalLine {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 13px;
+}
+
+.stat {
+  padding: 13px 14px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat b {
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.stat b i {
+  font-style: normal;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  margin-left: 3px;
+}
+
+.stat span {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  letter-spacing: 0.12em;
+}
+
+.recordDays {
+  font-size: 12px;
+  margin-top: 12px;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.recentList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.recentItem {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 13px;
+}
+
+.recentDate {
+  flex: none;
+  font-size: 13px;
+  color: var(--ink-soft);
+  min-width: 88px;
+}
+
+.recentValue {
+  flex: none;
+  font-size: 14px;
+}
+
+.recentNote {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recentEdit {
+  flex: none;
+  color: var(--ink-faint);
+  opacity: 0.7;
+}
+
+@media (min-width: 900px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

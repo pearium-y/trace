@@ -1,0 +1,163 @@
+.title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 400;
+}
+
+.emoji {
+  font-size: 21px;
+  line-height: 1;
+}
+
+.date {
+  font-size: 13px;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  margin-bottom: 16px;
+  padding-left: 2px;
+}
+
+.block {
+  margin-bottom: 4px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.chip {
+  padding: 7px 13px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-btn);
+  background: var(--paper-card);
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  transition: all 0.15s ease;
+}
+
+.chipOn {
+  border-color: var(--seal);
+  color: var(--seal-deep);
+  background: var(--seal-soft);
+}
+
+.hmRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hmItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.hmItem input {
+  width: 64px;
+  text-align: center;
+  padding: 8px 6px;
+}
+
+.hmTotal {
+  font-size: 13px;
+  color: var(--ink-faint);
+  margin-left: auto;
+}
+
+.countRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.stepBtn {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-card);
+  font-size: 22px;
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+.stepBtn:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+.countInput {
+  width: 100px;
+  text-align: center;
+  font-size: 21px;
+  padding: 9px 6px;
+}
+
+.countUnit {
+  color: var(--ink-soft);
+}
+
+.noneRow {
+  margin-bottom: 4px;
+}
+
+.noneBtn {
+  width: 100%;
+  padding: 13px;
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius-btn);
+  color: var(--ink-soft);
+  background: var(--paper-card);
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all 0.15s ease;
+}
+
+.noneOn {
+  border-style: solid;
+  border-color: var(--seal);
+  color: var(--seal-deep);
+  background: var(--seal-soft);
+}
+
+.hints {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  margin: 10px 0 14px;
+  padding-left: 2px;
+}
+
+.noteField {
+  margin-bottom: 14px;
+}
+
+.noteCount {
+  text-align: right;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  margin-top: 4px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+}

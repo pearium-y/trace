@@ -1,0 +1,233 @@
+.empty {
+  text-align: center;
+  padding: 48px 22px;
+}
+
+.empty p {
+  margin-top: 14px;
+  letter-spacing: 0.08em;
+}
+
+.periodNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 18px;
+}
+
+.navBtn {
+  width: 37px;
+  height: 37px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--ink);
+  border-radius: 11px 9px 12px 8px / 9px 12px 8px 11px;
+  background: var(--paper-card);
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+.navBtn:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+.navBtn[disabled] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.periodLabel {
+  flex: 1;
+  text-align: center;
+  font-size: 16.5px;
+  letter-spacing: 0.1em;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.statCard {
+  padding: 13px 14px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.statCard b {
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.statCard b i {
+  font-style: normal;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  margin-left: 3px;
+}
+
+.statCard span {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  letter-spacing: 0.12em;
+}
+
+.statSub {
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+.bestDay {
+  font-size: 17px !important;
+  letter-spacing: 0.03em;
+}
+
+.heatWrap {
+  padding: 15px 14px 12px;
+}
+
+.yearBlocks {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+  padding: 14px;
+}
+
+.yb {
+  aspect-ratio: 1.15;
+  border-radius: 9px 7px 10px 8px / 8px 10px 7px 9px;
+  border: 1px solid rgba(59, 50, 38, 0.16);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.yb span {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.yb em {
+  font-style: normal;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.chartWrap {
+  padding: 14px 14px 10px;
+}
+
+.habitRows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.habitRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 13px;
+}
+
+.hEmoji {
+  font-size: 20px;
+  flex: none;
+}
+
+.hInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.hName {
+  font-size: 14.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hMeta {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.hRight {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.hRight b {
+  font-size: 16.5px;
+  font-weight: 400;
+}
+
+.hDelta {
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+.up {
+  color: var(--bamboo);
+}
+
+.down {
+  color: var(--seal-deep);
+}
+
+.noteList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.noteItem {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 13px;
+  flex-wrap: wrap;
+}
+
+.noteDate {
+  flex: none;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  min-width: 74px;
+}
+
+.noteHabit {
+  flex: none;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.noteText {
+  flex: 1;
+  min-width: 120px;
+  font-size: 13.5px;
+}
+
+@media (min-width: 900px) {
+  .cardsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .yearBlocks {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}

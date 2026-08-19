@@ -1,0 +1,119 @@
+.msg {
+  background: var(--bamboo-soft);
+  border: 1.5px dashed var(--bamboo);
+  border-radius: var(--radius-btn);
+  color: var(--bamboo);
+  padding: 10px 14px;
+  font-size: 13.5px;
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 15px;
+  text-align: left;
+  width: 100%;
+  border-bottom: 1.5px dashed var(--line-soft);
+  color: var(--ink-soft);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.itemMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.itemMain b {
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.itemMain i {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.chev {
+  flex: none;
+  color: var(--ink-faint);
+}
+
+.dangerIcon {
+  color: var(--seal-deep);
+}
+
+.dangerText {
+  color: var(--seal-deep) !important;
+}
+
+.overview {
+  display: flex;
+  padding: 14px 8px;
+}
+
+.overview > div {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.overview b {
+  font-size: 19px;
+  font-weight: 400;
+}
+
+.overview span {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  letter-spacing: 0.14em;
+}
+
+.storageNote {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 10px;
+  padding: 0 4px;
+  line-height: 1.7;
+}
+
+.about {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+}
+
+.aboutText {
+  flex: 1;
+}
+
+.aboutText b {
+  font-size: 16px;
+  letter-spacing: 0.08em;
+}
+
+.aboutText p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 6px;
+  line-height: 1.7;
+}

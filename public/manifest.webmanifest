@@ -1,0 +1,17 @@
+{
+  "name": "循迹 Trace",
+  "short_name": "循迹",
+  "description": "习惯与计划的记录、追踪与回顾",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f6f1e5",
+  "theme_color": "#f6f1e5",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

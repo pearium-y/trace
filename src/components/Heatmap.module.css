@@ -1,0 +1,98 @@
+.scroll {
+  overflow-x: auto;
+  padding: 4px 2px 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.svg {
+  display: block;
+}
+
+.mlabel {
+  font-size: 10.5px;
+  fill: var(--ink-faint);
+  letter-spacing: 0.08em;
+}
+
+.wlabel {
+  font-size: 10px;
+  fill: var(--ink-faint);
+}
+
+.cell {
+  cursor: pointer;
+  transition: stroke 0.12s ease;
+}
+
+.cell:hover {
+  stroke: var(--ink);
+  stroke-width: 1.4;
+}
+
+/* 月历热力图 */
+.monthgrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.mw {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-faint);
+  padding: 2px 0 4px;
+  letter-spacing: 0.1em;
+}
+
+.mcell {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 1px solid rgba(59, 50, 38, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  transition: transform 0.1s ease;
+}
+
+.mcell:active {
+  transform: scale(0.93);
+}
+
+.mcell[data-today='true'] {
+  border: 1.8px solid var(--seal);
+  color: var(--ink);
+}
+
+.mcell[data-future='true'] {
+  border-style: dashed;
+  opacity: 0.45;
+}
+
+.dot {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--seal);
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: flex-end;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.lcell {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  border: 1px solid rgba(59, 50, 38, 0.14);
+}

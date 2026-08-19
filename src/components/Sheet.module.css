@@ -1,0 +1,49 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(59, 50, 38, 0.36);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.18s ease-out;
+}
+
+.panel {
+  width: 100%;
+  max-width: 560px;
+  background: var(--paper-card);
+  border: 1.5px solid var(--ink);
+  border-bottom: none;
+  border-radius: 18px 16px 0 0;
+  padding: 8px 18px calc(20px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 26px rgba(59, 50, 38, 0.2);
+  animation: upIn 0.24s cubic-bezier(0.25, 1, 0.4, 1);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.grip {
+  width: 40px;
+  height: 4.5px;
+  border-radius: 3px;
+  background: var(--line);
+  margin: 4px auto 10px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

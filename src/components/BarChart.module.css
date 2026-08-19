@@ -1,0 +1,67 @@
+.wrap {
+  padding: 6px 0 2px;
+}
+
+.plot {
+  position: relative;
+  border-bottom: 1.5px solid var(--ink-soft);
+}
+
+.gridlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.gridlines i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1.5px dashed var(--line-soft);
+}
+
+.bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 0;
+}
+
+.bar {
+  width: 68%;
+  max-width: 26px;
+  min-height: 2px;
+  background: var(--ink);
+  border-radius: 3px 3px 0 0;
+  transition: height 0.5s cubic-bezier(0.3, 1, 0.4, 1);
+}
+
+.hl {
+  background: var(--seal);
+}
+
+.labels {
+  display: flex;
+  gap: 3px;
+  margin-top: 5px;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+}
