@@ -88,6 +88,7 @@ export function RecordSheet({
                 max={23}
                 inputMode="numeric"
                 value={hours}
+                onFocus={(e) => e.target.select()}
                 onChange={(e) => setDurationParts(Number(e.target.value) || 0, mins)}
               />
               <span>小时</span>
@@ -99,6 +100,7 @@ export function RecordSheet({
                 max={59}
                 inputMode="numeric"
                 value={mins}
+                onFocus={(e) => e.target.select()}
                 onChange={(e) => setDurationParts(hours, Number(e.target.value) || 0)}
               />
               <span>分钟</span>
@@ -123,6 +125,7 @@ export function RecordSheet({
             max={999}
             inputMode="numeric"
             value={value}
+            onFocus={(e) => e.target.select()}
             onChange={(e) => setValue(Math.max(0, Math.min(999, Math.floor(Number(e.target.value) || 0))))}
           />
           <button
@@ -152,6 +155,7 @@ export function RecordSheet({
           maxLength={200}
           placeholder="记录这一笔的完成情况…"
           value={note}
+          onFocus={(e) => e.target.select()}
           onChange={(e) => setNote(e.target.value)}
         />
         <div className={styles.noteCount}>{note.length}/200</div>
