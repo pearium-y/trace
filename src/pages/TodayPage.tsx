@@ -4,7 +4,7 @@ import { HabitCard } from '../components/HabitCard';
 import { RecordSheet } from '../components/RecordSheet';
 import { Icon } from '../components/Icon';
 import { dateLabel, fullDateLabel, today, weekdayLabel } from '../utils/date';
-import { computeStreak, dayValue } from '../utils/stats';
+import { computeStreak, dayValue, overallDayRatio } from '../utils/stats';
 import type { Habit } from '../types';
 import styles from './TodayPage.module.css';
 
@@ -131,8 +131,11 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
             )}
             <div className={styles.sumDivider} />
             <div className={styles.sumItem}>
-              <b className="num">{habits.length}</b>
-              <span>进行中的计划</span>
+              <b className="num">
+                {Math.round(overallDayRatio(habits, db.records, selDate) * 100)}
+                <i>%</i>
+              </b>
+              <span>今日完成度</span>
             </div>
           </div>
 
