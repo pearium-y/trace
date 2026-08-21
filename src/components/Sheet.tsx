@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from './Icon';
 import styles from './Sheet.module.css';
 
@@ -25,7 +26,7 @@ export function Sheet({
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.panel}
@@ -44,6 +45,7 @@ export function Sheet({
         )}
         <div className={styles.body}>{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
