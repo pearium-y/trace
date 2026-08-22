@@ -3,3 +3,6 @@ dist
 *.local
 .DS_Store
 .trae-html-share-packages
+
+# 本地脚本与临时文件（非 Trace 功能，不入库）
+local/
