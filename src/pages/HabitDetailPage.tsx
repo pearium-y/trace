@@ -5,7 +5,7 @@ import { HeatLegend, YearHeatmap } from '../components/Heatmap';
 import { RecordSheet } from '../components/RecordSheet';
 import { SectionTitle } from '../components/Basics';
 import { Icon } from '../components/Icon';
-import { HABIT_COLORS } from '../utils/colors';
+import { colorOf, projectLabel, tagLabel } from '../utils/colors';
 import { addDays, relativeDayLabel, today } from '../utils/date';
 import { fmtDuration, fmtPct } from '../utils/format';
 import { computeStreak, dayRatio, dayValue, goalText, habitRangeStat, heatLevel, valueLabel } from '../utils/stats';
@@ -20,7 +20,7 @@ export default function HabitDetailPage({
   onBack: () => void;
   onEdit: () => void;
 }) {
-  const { db, setRecord, removeRecord } = useStore();
+  const { db, t, lang, setRecord, removeRecord } = useStore();
   const [editingDate, setEditingDate] = useState<string | null>(null);
 
   const habit = db.habits.find((h) => h.id === habitId);
@@ -28,22 +28,26 @@ export default function HabitDetailPage({
   if (!habit) {
     return (
       <div className="empty">
-        <p>该计划不存在或已被删除</p>
+        <p>{t('habitNotFound')}</p>
         <button className="btn" onClick={onBack}>
-          返回计划列表
+          {t('backToList')}
         </button>
       </div>
     );
   }
 
-  const def = HABIT_COLORS[habit.color];
+  const def = colorOf(habit.color);
   const records = db.records[habit.id] ?? {};
   const streak = computeStreak(habit, db.records);
   const stat30 = habitRangeStat(habit, db.records, addDays(today(), -29), today());
   const total = Object.values(records).reduce((s, r) => s + r.value, 0);
   const recordDays = Object.keys(records).length;
   const isWeekly = habit.frequency === 'weekly';
-  const unit = isWeekly ? '周' : '天';
+  const unit = isWeekly ? t('unitWeek') : t('unitDay');
+  const project = db.projects.find((p) => p.id === habit.projectId);
+  const tags = habit.tagIds
+    .map((id) => db.tags.find((tag) => tag.id === id))
+    .filter((tag) => !!tag);
 
   const cellOf = (d: string) => {
     const v = dayValue(db.records, habit.id, d);
@@ -51,7 +55,7 @@ export default function HabitDetailPage({
       level: heatLevel(dayRatio(habit, db.records, d)),
       value: v,
       hasNote: !!records[d]?.note,
-      text: v > 0 ? valueLabel(habit, v) : undefined,
+      text: v > 0 ? valueLabel(habit, v, t) : undefined,
     };
   };
 
@@ -64,62 +68,93 @@ export default function HabitDetailPage({
   return (
     <div>
       <header className="subheader">
-        <button className="icon-btn" onClick={onBack} aria-label="返回">
+        <button className="icon-btn" onClick={onBack} aria-label={t('back')}>
           <Icon name="back" />
         </button>
         <div className="subheader-title">
           {habit.emoji} {habit.name}
         </div>
-        <button className="icon-btn" onClick={onEdit} aria-label="编辑计划" title="编辑计划">
+        <button className="icon-btn" onClick={onEdit} aria-label={t('edit')} title={t('edit')}>
           <Icon name="edit" />
         </button>
       </header>
 
       <section className={`card tape ${styles.heatCard}`} style={{ '--tape-color': `${def.accent}55` } as CSSProperties}>
-        <p className={styles.goalLine}>{goalText(habit)} · 创建于 {habit.createdAt}</p>
-        <YearHeatmap cellOf={cellOf} ramp={def.ramp} onSelect={(d) => setEditingDate(d)} />
+        <p className={styles.goalLine}>
+          {goalText(habit, t)} · {t('createdOn', { date: habit.createdAt })}
+        </p>
+        {(project || tags.length > 0) && (
+          <div className={styles.tagRow}>
+            {project && (
+              <span className="tagchip">
+                <Icon name="folder" size={11} />
+                {projectLabel(project, t)}
+              </span>
+            )}
+            {tags.map((tag) => {
+              const tdef = colorOf(tag.color);
+              return (
+                <span key={tag.id} className="tagchip">
+                  <i className="dot" style={{ background: tdef.accent }} />
+                  {tagLabel(tag, t)}
+                </span>
+              );
+            })}
+          </div>
+        )}
+        <YearHeatmap cellOf={cellOf} ramp={def.ramp} onSelect={(d) => setEditingDate(d)} lang={lang} />
         <HeatLegend ramp={def.ramp} />
       </section>
 
-      <SectionTitle>统计</SectionTitle>
+      {habit.notes && (
+        <>
+          <SectionTitle>{t('habitNotesTitle')}</SectionTitle>
+          <div className={`card ${styles.habitNote}`}>
+            <Icon name="note" size={15} />
+            <p>{habit.notes}</p>
+          </div>
+        </>
+      )}
+
+      <SectionTitle>{t('statsTitle')}</SectionTitle>
       <div className={styles.statsGrid}>
         <div className={`card ${styles.stat}`}>
           <b className="num">
             {streak.current}
             <i>{unit}</i>
           </b>
-          <span>当前连续</span>
+          <span>{t('currentStreak')}</span>
         </div>
         <div className={`card ${styles.stat}`}>
           <b className="num">
             {streak.longest}
             <i>{unit}</i>
           </b>
-          <span>最长连续</span>
+          <span>{t('longestStreak')}</span>
         </div>
         <div className={`card ${styles.stat}`}>
           <b className="num">
-            {habit.goalType === 'duration' ? fmtDuration(total) : `${total}`}
-            <i>{habit.goalType === 'duration' ? '' : habit.goalType === 'count' ? '次' : '笔'}</i>
+            {habit.goalType === 'duration' ? fmtDuration(total, t) : `${total}`}
+            <i>{habit.goalType === 'duration' ? '' : habit.goalType === 'count' ? t('unitTimes') : ''}</i>
           </b>
-          <span>{habit.goalType === 'duration' ? '累计时长' : '累计记录'}</span>
+          <span>{habit.goalType === 'duration' ? t('totalDurationStat') : t('totalRecordStat')}</span>
         </div>
         <div className={`card ${styles.stat}`}>
           <b className="num">{fmtPct(stat30.rate)}</b>
-          <span>近30天完成率</span>
+          <span>{t('rate30')}</span>
         </div>
       </div>
-      <p className={`${styles.recordDays} faint`}>共记录 {recordDays} 天 · 点击热力图任意格子可补录当天</p>
+      <p className={`${styles.recordDays} faint`}>{t('recordDaysLine', { n: recordDays })}</p>
 
-      <SectionTitle>近期记录</SectionTitle>
+      <SectionTitle>{t('recentRecords')}</SectionTitle>
       {recent.length === 0 ? (
-        <p className="muted">暂无记录，从今日页或热力图开始第一笔。</p>
+        <p className="muted">{t('noRecordsYet')}</p>
       ) : (
         <div className={styles.recentList}>
           {recent.map(([date, rec]) => (
             <button key={date} type="button" className={`card ${styles.recentItem}`} onClick={() => setEditingDate(date)}>
-              <span className={`${styles.recentDate} num`}>{relativeDayLabel(date)}</span>
-              <span className={`${styles.recentValue} num`}>{valueLabel(habit, rec.value)}</span>
+              <span className={`${styles.recentDate} num`}>{relativeDayLabel(date, lang)}</span>
+              <span className={`${styles.recentValue} num`}>{valueLabel(habit, rec.value, t)}</span>
               {rec.note && <span className={styles.recentNote}>{rec.note}</span>}
               <Icon name="edit" size={14} className={styles.recentEdit} />
             </button>

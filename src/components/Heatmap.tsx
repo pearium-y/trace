@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import type { DateStr } from '../utils/date';
-import { addDays, daysInMonth, monthOf, rangeDays, startOfWeek, today, weekdayIndex } from '../utils/date';
+import { addDays, daysInMonth, monthOf, monthShort, rangeDays, startOfWeek, today, weekdayIndex, weekdaysShort } from '../utils/date';
+import type { Lang } from '../types';
+import { useStore } from '../store';
 import styles from './Heatmap.module.css';
 
 export interface CellInfo {
@@ -16,10 +18,11 @@ export interface YearHeatmapProps {
   cellOf: (d: DateStr) => CellInfo;
   ramp: [string, string, string, string, string];
   onSelect?: (d: DateStr) => void;
+  lang?: Lang;
 }
 
 /** GitHub 式年度热力图（近一年，周一为行首） */
-export function YearHeatmap({ end, cellOf, ramp, onSelect }: YearHeatmapProps) {
+export function YearHeatmap({ end, cellOf, ramp, onSelect, lang = 'zh' }: YearHeatmapProps) {
   const e = end ?? today();
   const days = useMemo(() => {
     const start = startOfWeek(addDays(e, -364));
@@ -43,14 +46,16 @@ export function YearHeatmap({ end, cellOf, ramp, onSelect }: YearHeatmapProps) {
   weeks.forEach((w, i) => {
     const m = monthOf(w[0]);
     if (m !== prevM) {
-      monthLabels.push({ x: LEFT + i * STEP, text: `${m + 1}月` });
+      monthLabels.push({ x: LEFT + i * STEP, text: monthShort(m, lang) });
       prevM = m;
     }
   });
 
+  const rowLabels = lang === 'en' ? ['M', 'W', 'F'] : ['一', '三', '五'];
+
   return (
     <div className={styles.scroll}>
-      <svg width={width} height={height} className={styles.svg} role="img" aria-label="年度热力图">
+      <svg width={width} height={height} className={styles.svg} role="img" aria-label="heatmap">
         {monthLabels.map((l, i) => (
           <text key={i} x={l.x} y={11} className={styles.mlabel}>
             {l.text}
@@ -58,7 +63,7 @@ export function YearHeatmap({ end, cellOf, ramp, onSelect }: YearHeatmapProps) {
         ))}
         {[0, 2, 4].map((r) => (
           <text key={r} x={LEFT - 8} y={TOP + r * STEP + CELL - 1} textAnchor="end" className={styles.wlabel}>
-            {['一', '三', '五'][r / 2]}
+            {rowLabels[r / 2]}
           </text>
         ))}
         {weeks.map((w, wi) =>
@@ -81,7 +86,7 @@ export function YearHeatmap({ end, cellOf, ramp, onSelect }: YearHeatmapProps) {
                 className={onSelect && !future ? styles.cell : undefined}
                 onClick={onSelect && !future ? () => onSelect(d) : undefined}
               >
-                <title>{`${d}${c.text ?? (c.value > 0 ? ` · ${c.value}` : '')}${c.hasNote ? ' · 有备注' : ''}`}</title>
+                <title>{`${d}${c.text ?? (c.value > 0 ? ` · ${c.value}` : '')}${c.hasNote ? (lang === 'en' ? ' · note' : ' · 有备注') : ''}`}</title>
               </rect>
             );
           }),
@@ -97,10 +102,11 @@ export interface MonthHeatmapProps {
   cellOf: (d: DateStr) => CellInfo;
   ramp: [string, string, string, string, string];
   onSelect?: (d: DateStr) => void;
+  lang?: Lang;
 }
 
 /** 月历式热力图 */
-export function MonthHeatmap({ monthStart, cellOf, ramp, onSelect }: MonthHeatmapProps) {
+export function MonthHeatmap({ monthStart, cellOf, ramp, onSelect, lang = 'zh' }: MonthHeatmapProps) {
   const dim = daysInMonth(monthStart);
   const lead = weekdayIndex(monthStart);
   const t = today();
@@ -111,8 +117,8 @@ export function MonthHeatmap({ monthStart, cellOf, ramp, onSelect }: MonthHeatma
 
   return (
     <div className={styles.monthgrid}>
-      {['一', '二', '三', '四', '五', '六', '日'].map((w) => (
-        <div key={w} className={styles.mw}>
+      {weekdaysShort(lang).map((w, i) => (
+        <div key={i} className={styles.mw}>
           {w}
         </div>
       ))}
@@ -129,7 +135,7 @@ export function MonthHeatmap({ monthStart, cellOf, ramp, onSelect }: MonthHeatma
             data-today={d === t || undefined}
             data-future={future || undefined}
             onClick={() => !future && onSelect?.(d)}
-            title={`${d}${c.text ?? (c.value > 0 ? ` · ${c.value}` : '')}${c.hasNote ? ' · 有备注' : ''}`}
+            title={`${d}${c.text ?? (c.value > 0 ? ` · ${c.value}` : '')}${c.hasNote ? (lang === 'en' ? ' · note' : ' · 有备注') : ''}`}
           >
             <span className={styles.mday}>{Number(d.slice(8))}</span>
             {c.hasNote && <i className={styles.dot} />}
@@ -141,13 +147,14 @@ export function MonthHeatmap({ monthStart, cellOf, ramp, onSelect }: MonthHeatma
 }
 
 export function HeatLegend({ ramp }: { ramp: [string, string, string, string, string] }) {
+  const { t } = useStore();
   return (
     <div className={styles.legend}>
-      <span className="faint">少</span>
+      <span className="faint">{t('less')}</span>
       {ramp.map((c) => (
         <i key={c} className={styles.lcell} style={{ background: c }} />
       ))}
-      <span className="faint">多</span>
+      <span className="faint">{t('more')}</span>
     </div>
   );
 }

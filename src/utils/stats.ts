@@ -1,4 +1,5 @@
 import type { Habit, RecordMap } from '../types';
+import type { T } from '../i18n';
 import { addDays, startOfWeek, today } from './date';
 import { fmtDuration } from './format';
 
@@ -10,7 +11,7 @@ export function getRecord(records: RecordMap, habitId: string, date: string) {
   return records[habitId]?.[date];
 }
 
-/** 某计划某日的完成比值（周计划按 周目标/7 折算到日；无目标=有记录即 1） */
+/** 某习惯某日的完成比值（周目标按 周目标/7 折算到日；无目标=有记录即 1） */
 export function dayRatio(habit: Habit, records: RecordMap, date: string): number {
   const v = dayValue(records, habit.id, date);
   if (habit.goalType === 'none' || habit.target <= 0) return v > 0 ? 1 : 0;
@@ -25,14 +26,14 @@ export function weekValueSum(habit: Habit, records: RecordMap, dateInWeek: strin
   return sum;
 }
 
-/** 某日是否有实质记录（无目标计划以此判定完成） */
+/** 某日是否有实质记录（无目标习惯以此判定完成） */
 export function isDayMet(habit: Habit, records: RecordMap, date: string): boolean {
   const v = dayValue(records, habit.id, date);
   if (habit.goalType === 'none' || habit.target <= 0) return v > 0;
   return habit.frequency === 'daily' ? v >= habit.target : v > 0;
 }
 
-/** 周计划的本周目标是否达成 */
+/** 周目标的本周是否达成 */
 export function isWeekMet(habit: Habit, records: RecordMap, dateInWeek: string): boolean {
   const wv = weekValueSum(habit, records, dateInWeek);
   if (habit.goalType === 'none' || habit.target <= 0) return wv > 0;
@@ -67,7 +68,7 @@ export function computeStreak(habit: Habit, records: RecordMap): Streak {
     }
     return { current: cur, longest: Math.max(best, cur) };
   }
-  // 周计划：按周计连续
+  // 周习惯：按周计连续
   let cur = 0;
   let w = startOfWeek(t);
   if (!isWeekMet(habit, records, w)) w = addDays(w, -7);
@@ -99,7 +100,7 @@ export interface RangeStat {
   total: number;
 }
 
-/** 某计划在区间内的完成情况（每日计划按天计，每周计划按周计） */
+/** 某习惯在区间内的完成情况（每日习惯按天计，每周习惯按周计） */
 export function habitRangeStat(habit: Habit, records: RecordMap, start: string, end: string): RangeStat {
   const t = today();
   const effectiveEnd = end > t ? t : end;
@@ -142,7 +143,7 @@ export function heatLevel(ratio: number): number {
   return 1;
 }
 
-/** 全部计划在某日的总体完成比值（各计划当日比值封顶后取平均） */
+/** 全部习惯在某日的总体完成比值（各习惯当日比值封顶后取平均） */
 export function overallDayRatio(habits: Habit[], records: RecordMap, date: string): number {
   let sum = 0;
   let n = 0;
@@ -185,18 +186,18 @@ export function collectNotes(
   return out.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-export function goalText(habit: Habit): string {
-  const freq = habit.frequency === 'daily' ? '每日' : '每周';
-  if (habit.goalType === 'none') return `${freq} · 无目标`;
-  if (habit.goalType === 'count') return `${freq} ${habit.target} 次`;
-  return `${freq} ${fmtDuration(habit.target)}`;
+export function goalText(habit: Habit, t: T): string {
+  const freq = habit.frequency === 'daily' ? t('daily') : t('weekly');
+  if (habit.goalType === 'none') return `${freq} · ${t('goalNone')}`;
+  if (habit.goalType === 'count') return `${freq} ${t('timesUnit', { n: habit.target })}`;
+  return `${freq} ${fmtDuration(habit.target, t)}`;
 }
 
-export function valueLabel(habit: Habit, v: number): string {
-  if (habit.goalType === 'duration') return fmtDuration(v);
-  return `${v} 次`;
+export function valueLabel(habit: Habit, v: number, t: T): string {
+  if (habit.goalType === 'duration') return fmtDuration(v, t);
+  return t('timesUnit', { n: v });
 }
 
-export function streakUnit(habit: Habit): string {
-  return habit.frequency === 'daily' ? '天' : '周';
+export function streakUnit(habit: Habit, t: T): string {
+  return habit.frequency === 'daily' ? t('unitDay') : t('unitWeek');
 }

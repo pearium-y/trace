@@ -5,7 +5,7 @@ import { BarChart } from '../components/BarChart';
 import type { Bar } from '../components/BarChart';
 import { HeatLegend, MonthHeatmap } from '../components/Heatmap';
 import { Icon } from '../components/Icon';
-import { HABIT_COLORS } from '../utils/colors';
+import { colorOf } from '../utils/colors';
 import {
   addDays,
   addMonths,
@@ -14,14 +14,15 @@ import {
   dateOf,
   endOfMonth,
   endOfYear,
+  monthOf,
+  monthShort,
   rangeDays,
   relativeDayLabel,
   startOfMonth,
   startOfWeek,
   startOfYear,
   today,
-  weekdayIndex,
-  WEEKDAY_FULL,
+  weekdayLabel,
   yearOf,
 } from '../utils/date';
 import { fmtDuration, fmtPct } from '../utils/format';
@@ -31,30 +32,33 @@ import styles from './ReportPage.module.css';
 type Dim = 'week' | 'month' | 'year';
 
 export default function ReportPage() {
-  const { db } = useStore();
+  const { db, t, lang, activeProjectId } = useStore();
   const [dim, setDim] = useState<Dim>('week');
   const [anchor, setAnchor] = useState(today());
-  const t = today();
-  const habits = db.habits;
-  const ramp = HABIT_COLORS.seal.ramp;
+  const t0 = today();
+  const habits = db.habits.filter((h) => !activeProjectId || h.projectId === activeProjectId);
+  const ramp = colorOf('seal').ramp;
 
   const range =
     dim === 'week'
       ? {
           start: startOfWeek(anchor),
           end: addDays(startOfWeek(anchor), 6),
-          label: `${dateLabel(startOfWeek(anchor))} – ${dateLabel(addDays(startOfWeek(anchor), 6))}`,
+          label: `${dateLabel(startOfWeek(anchor), lang)} – ${dateLabel(addDays(startOfWeek(anchor), 6), lang)}`,
         }
       : dim === 'month'
         ? {
             start: startOfMonth(anchor),
             end: endOfMonth(anchor),
-            label: `${startOfMonth(anchor).slice(0, 4)}年${Number(startOfMonth(anchor).slice(5, 7))}月`,
+            label:
+              lang === 'en'
+                ? `${monthShort(monthOf(anchor), lang)} ${yearOf(anchor)}`
+                : `${yearOf(anchor)}年${monthOf(anchor) + 1}月`,
           }
         : {
             start: startOfYear(anchor),
             end: endOfYear(anchor),
-            label: `${yearOf(anchor)}年`,
+            label: lang === 'en' ? `${yearOf(anchor)}` : `${yearOf(anchor)}年`,
           };
 
   const prevRange =
@@ -79,7 +83,7 @@ export default function ReportPage() {
       : dim === 'month'
         ? addMonths(startOfMonth(anchor), 1)
         : addYears(startOfYear(anchor), 1);
-  const canNext = nextStart <= t;
+  const canNext = nextStart <= t0;
 
   const stats = habits.map((h) => habitRangeStat(h, db.records, range.start, range.end));
   const dueTotal = stats.reduce((s, x) => s + x.due, 0);
@@ -88,7 +92,7 @@ export default function ReportPage() {
   const countTotal = habits.reduce((s, h, i) => (h.goalType === 'duration' ? s : s + stats[i].total), 0);
   const durationTotal = habits.reduce((s, h, i) => (h.goalType === 'duration' ? s + stats[i].total : s), 0);
 
-  const days = rangeDays(range.start, range.end).filter((d) => d <= t);
+  const days = rangeDays(range.start, range.end).filter((d) => d <= t0);
   const recordedDays = days.filter((d) => hasAnyRecord(db.records, d)).length;
 
   let longestRun = 0;
@@ -116,15 +120,18 @@ export default function ReportPage() {
     dim === 'year'
       ? Array.from({ length: 12 }, (_, m) => {
           const ms = `${yearOf(anchor)}-${String(m + 1).padStart(2, '0')}-01`;
-          const ds = rangeDays(ms, endOfMonth(ms)).filter((d) => d <= t);
+          const ds = rangeDays(ms, endOfMonth(ms)).filter((d) => d <= t0);
           const avg =
             ds.length > 0
               ? ds.reduce((s, d) => s + overallDayRatio(habits, db.records, d), 0) / ds.length
               : 0;
-          return { label: `${m + 1}月`, value: avg };
+          return { label: monthShort(m, lang), value: avg };
         })
       : days.map((d) => ({
-          label: dim === 'week' ? WEEKDAY_FULL[weekdayIndex(d)].replace('周', '') : `${dateOf(d)}`,
+          label:
+            dim === 'week'
+              ? weekdayLabel(d, lang).replace('周', '')
+              : `${dateOf(d)}`,
           value: overallDayRatio(habits, db.records, d),
           highlight: bestDay === d,
         }));
@@ -143,7 +150,7 @@ export default function ReportPage() {
 
   const overallCell = (d: string) => {
     const r = overallDayRatio(habits, db.records, d);
-    return { level: heatLevel(r), value: Math.round(r * 100), hasNote: false, text: r > 0 ? `完成 ${fmtPct(r)}` : undefined };
+    return { level: heatLevel(r), value: Math.round(r * 100), hasNote: false, text: r > 0 ? t('completionPct', { pct: fmtPct(r) }) : undefined };
   };
 
   if (habits.length === 0) {
@@ -151,12 +158,13 @@ export default function ReportPage() {
       <div>
         <header className="page-header">
           <h1 className="page-title">
-            报告<small>REPORT</small>
+            {t('reportTitle')}
+            <small>REPORT</small>
           </h1>
         </header>
         <div className={`card ${styles.empty}`}>
           <div className="empty-seal">迹</div>
-          <p className="muted">创建计划并坚持记录后，这里会长出你的分析报告</p>
+          <p className="muted">{t('reportEmpty')}</p>
         </div>
       </div>
     );
@@ -166,7 +174,8 @@ export default function ReportPage() {
     <div>
       <header className="page-header">
         <h1 className="page-title">
-          报告<small>REPORT</small>
+          {t('reportTitle')}
+          <small>REPORT</small>
         </h1>
       </header>
 
@@ -174,18 +183,18 @@ export default function ReportPage() {
         value={dim}
         onChange={setDim}
         options={[
-          { value: 'week', label: '周报' },
-          { value: 'month', label: '月报' },
-          { value: 'year', label: '年报' },
+          { value: 'week', label: t('reportWeek') },
+          { value: 'month', label: t('reportMonth') },
+          { value: 'year', label: t('reportYear') },
         ]}
       />
 
       <div className={styles.periodNav}>
-        <button className={styles.navBtn} onClick={() => shift(-1)} aria-label="上一期">
+        <button className={styles.navBtn} onClick={() => shift(-1)} aria-label={t('prevPeriod')}>
           <Icon name="chevron-left" size={17} />
         </button>
         <span className={styles.periodLabel}>{range.label}</span>
-        <button className={styles.navBtn} disabled={!canNext} onClick={() => shift(1)} aria-label="下一期">
+        <button className={styles.navBtn} disabled={!canNext} onClick={() => shift(1)} aria-label={t('nextPeriod')}>
           <Icon name="chevron-right" size={17} />
         </button>
       </div>
@@ -193,53 +202,55 @@ export default function ReportPage() {
       <div className={styles.cardsGrid}>
         <div className={`card ${styles.statCard}`}>
           <b className="num">{fmtPct(rate)}</b>
-          <span>总完成率</span>
-          <i className={styles.statSub}>{dueTotal > 0 ? `${metTotal}/${dueTotal} 项达成` : '暂无应完成项'}</i>
+          <span>{t('totalRate')}</span>
+          <i className={styles.statSub}>
+            {dueTotal > 0 ? t('itemsMet', { met: metTotal, due: dueTotal }) : t('noDueItems')}
+          </i>
         </div>
         <div className={`card ${styles.statCard}`}>
           <b className="num">
             {recordedDays}
-            <i>天</i>
+            <i>{t('unitDay')}</i>
           </b>
-          <span>记录天数</span>
-          <i className={styles.statSub}>期间共 {days.length} 天</i>
+          <span>{t('recordedDaysCard')}</span>
+          <i className={styles.statSub}>{t('ofDays', { n: days.length })}</i>
         </div>
         {countTotal > 0 && (
           <div className={`card ${styles.statCard}`}>
             <b className="num">
               {countTotal}
-              <i>次</i>
+              <i>{t('unitTimes')}</i>
             </b>
-            <span>累计次数</span>
+            <span>{t('totalCount')}</span>
           </div>
         )}
         {durationTotal > 0 && (
           <div className={`card ${styles.statCard}`}>
-            <b className="num">{fmtDuration(durationTotal)}</b>
-            <span>累计时长</span>
+            <b className="num">{fmtDuration(durationTotal, t)}</b>
+            <span>{t('totalDurationStat')}</span>
           </div>
         )}
         <div className={`card ${styles.statCard}`}>
           <b className="num">
             {longestRun}
-            <i>天</i>
+            <i>{t('unitDay')}</i>
           </b>
-          <span>最长连续记录</span>
+          <span>{t('longestRun')}</span>
         </div>
         {bestDay && (
           <div className={`card ${styles.statCard}`}>
-            <b className={styles.bestDay}>{dateLabel(bestDay)}</b>
-            <span>最佳一日</span>
-            <i className={styles.statSub}>完成 {fmtPct(bestRatio)}</i>
+            <b className={styles.bestDay}>{dateLabel(bestDay, lang)}</b>
+            <span>{t('bestDay')}</span>
+            <i className={styles.statSub}>{t('completionPct', { pct: fmtPct(bestRatio) })}</i>
           </div>
         )}
       </div>
 
       {dim === 'month' && (
         <>
-          <SectionTitle>本月热力图</SectionTitle>
+          <SectionTitle>{t('monthHeatmap')}</SectionTitle>
           <div className={`card ${styles.heatWrap}`}>
-            <MonthHeatmap monthStart={startOfMonth(anchor)} cellOf={overallCell} ramp={ramp} />
+            <MonthHeatmap monthStart={startOfMonth(anchor)} cellOf={overallCell} ramp={ramp} lang={lang} />
             <HeatLegend ramp={ramp} />
           </div>
         </>
@@ -247,16 +258,16 @@ export default function ReportPage() {
 
       {dim === 'year' && (
         <>
-          <SectionTitle>全年概览</SectionTitle>
+          <SectionTitle>{t('yearOverview')}</SectionTitle>
           <div className={`card ${styles.yearBlocks}`}>
             {bars.map((b, m) => (
               <div
                 key={m}
                 className={styles.yb}
                 style={{ background: ramp[heatLevel(b.value)] }}
-                title={`${b.label} 完成 ${fmtPct(b.value)}`}
+                title={`${b.label} ${t('completionPct', { pct: fmtPct(b.value) })}`}
               >
-                <span className="num">{m + 1}月</span>
+                <span className="num">{monthShort(m, lang)}</span>
                 <em>{fmtPct(b.value)}</em>
               </div>
             ))}
@@ -264,12 +275,12 @@ export default function ReportPage() {
         </>
       )}
 
-      <SectionTitle>{dim === 'year' ? '月度完成度' : '每日完成度'}</SectionTitle>
+      <SectionTitle>{dim === 'year' ? t('monthlyCompletion') : t('dailyCompletion')}</SectionTitle>
       <div className={`card ${styles.chartWrap}`}>
         <BarChart bars={bars} height={140} />
       </div>
 
-      <SectionTitle>各计划表现</SectionTitle>
+      <SectionTitle>{t('habitPerformance')}</SectionTitle>
       <div className={styles.habitRows}>
         {rows.map(({ habit: h, stat, delta }) => (
           <div key={h.id} className={`card ${styles.habitRow}`}>
@@ -277,7 +288,8 @@ export default function ReportPage() {
             <div className={styles.hInfo}>
               <span className={styles.hName}>{h.name}</span>
               <span className={styles.hMeta}>
-                {h.goalType === 'duration' ? fmtDuration(stat.total) : `${stat.total} 次`} · 达成 {stat.met}/{stat.due}
+                {h.goalType === 'duration' ? fmtDuration(stat.total, t) : `${stat.total} ${t('unitTimes')}`} ·{' '}
+                {t('achieved', { met: stat.met, due: stat.due })}
               </span>
             </div>
             <div className={styles.hRight}>
@@ -289,21 +301,21 @@ export default function ReportPage() {
               ) : delta < -0.001 ? (
                 <i className={`${styles.hDelta} ${styles.down}`}>↓ {fmtPct(Math.abs(delta))}</i>
               ) : (
-                <i className={styles.hDelta}>持平</i>
+                <i className={styles.hDelta}>{t('flat')}</i>
               )}
             </div>
           </div>
         ))}
       </div>
 
-      <SectionTitle>备注回顾</SectionTitle>
+      <SectionTitle>{t('notesReview')}</SectionTitle>
       {notes.length === 0 ? (
-        <p className="muted">本期没有留下备注。</p>
+        <p className="muted">{t('noNotes')}</p>
       ) : (
         <div className={styles.noteList}>
           {notes.map((n, i) => (
             <div key={i} className={`card ${styles.noteItem}`}>
-              <span className={styles.noteDate}>{relativeDayLabel(n.date)}</span>
+              <span className={styles.noteDate}>{relativeDayLabel(n.date, lang)}</span>
               <span className={styles.noteHabit}>
                 {n.habit.emoji} {n.habit.name}
               </span>

@@ -2,17 +2,21 @@ import { useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useStore } from '../store';
 import { DB_KEY, buildExport, parseImport } from '../storage';
-import { SectionTitle } from '../components/Basics';
+import { SectionTitle, Segmented } from '../components/Basics';
 import { Icon } from '../components/Icon';
+import { ProjectEditor } from '../components/ProjectSwitcher';
+import { colorOf, projectLabel } from '../utils/colors';
 import { today } from '../utils/date';
 import { buildCSV } from '../utils/csv';
 import { downloadFile } from '../utils/download';
+import type { Project } from '../types';
 import styles from './SettingsPage.module.css';
 
 export default function SettingsPage() {
-  const { db, importDB, clearAll } = useStore();
+  const { db, lang, t, importDB, clearAll, setLang } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState('');
+  const [editor, setEditor] = useState<Project | 'new' | null>(null);
 
   const recordCount = useMemo(
     () => Object.values(db.records).reduce((s, days) => s + Object.keys(days).length, 0),
@@ -30,13 +34,13 @@ export default function SettingsPage() {
   const exportJSON = () => {
     const name = `trace-backup-${today().replaceAll('-', '')}.json`;
     downloadFile(name, JSON.stringify(buildExport(db), null, 2), 'application/json');
-    setMsg(`已导出备份：${name}`);
+    setMsg(t('exportJsonDone', { name }));
   };
 
   const exportCSV = () => {
     const name = `trace-records-${today().replaceAll('-', '')}.csv`;
-    downloadFile(name, buildCSV(db), 'text/csv');
-    setMsg(`已导出记录：${name}`);
+    downloadFile(name, buildCSV(db, lang), 'text/csv');
+    setMsg(t('exportCsvDone', { name }));
   };
 
   const onImportFile = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -47,61 +51,109 @@ export default function SettingsPage() {
       const text = await file.text();
       const parsed = parseImport(text);
       if (!parsed) {
-        setMsg('导入失败：不是有效的循迹备份文件');
+        setMsg(t('importInvalid'));
         return;
       }
       const ok = window.confirm(
-        `将用备份覆盖当前数据。\n\n当前：${db.habits.length} 个计划、${recordCount} 条记录\n备份：${parsed.habits.length} 个计划\n\n确定覆盖吗？`,
+        t('importConfirm', {
+          h: db.habits.length,
+          r: recordCount,
+          bh: parsed.habits.length,
+        }),
       );
       if (ok) {
         importDB(parsed);
-        setMsg('导入成功，数据已恢复');
+        setMsg(t('importSuccess'));
       }
     } catch {
-      setMsg('导入失败：文件读取错误');
+      setMsg(t('importReadError'));
     }
   };
 
   const onClear = () => {
-    if (!window.confirm('确定清空全部数据？此操作不可恢复。')) return;
-    if (!window.confirm('再次确认：真的要清空全部计划与记录吗？建议先导出备份。')) return;
+    if (!window.confirm(t('clearConfirm1'))) return;
+    if (!window.confirm(t('clearConfirm2'))) return;
     clearAll();
-    setMsg('已清空全部数据');
+    setMsg(t('clearedMsg'));
   };
 
   return (
     <div>
       <header className="page-header">
         <h1 className="page-title">
-          设置<small>SETTINGS</small>
+          {t('tabSettings')}
+          <small>SETTINGS</small>
         </h1>
       </header>
 
       {msg && <div className={styles.msg}>{msg}</div>}
 
-      <SectionTitle>数据备份</SectionTitle>
+      <SectionTitle>{t('language')}</SectionTitle>
+      <div className={styles.langWrap}>
+        <Segmented
+          value={lang}
+          onChange={setLang}
+          options={[
+            { value: 'zh', label: t('langZh') },
+            { value: 'en', label: t('langEn') },
+          ]}
+        />
+      </div>
+
+      <SectionTitle>{t('manageProjects')}</SectionTitle>
+      <div className={`card ${styles.group}`}>
+        {db.projects.map((p) => {
+          const def = colorOf(p.color);
+          return (
+            <button key={p.id} type="button" className={styles.item} onClick={() => setEditor(p)}>
+              <span
+                className="proj-emoji"
+                style={{ width: 30, height: 30, fontSize: 16, background: `${def.accent}1e`, borderColor: `${def.accent}55` }}
+              >
+                {p.emoji}
+              </span>
+              <span className={styles.itemMain}>
+                <b>{projectLabel(p, t)}</b>
+                <i>{t('projectHabitCount', { n: db.habits.filter((h) => h.projectId === p.id).length })}</i>
+              </span>
+              <Icon name="edit" size={15} className={styles.chev} />
+            </button>
+          );
+        })}
+        <button type="button" className={styles.item} onClick={() => setEditor('new')}>
+          <span className={styles.addIcon}>
+            <Icon name="plus" size={15} />
+          </span>
+          <span className={styles.itemMain}>
+            <b>{t('newProject')}</b>
+          </span>
+          <Icon name="chevron-right" size={15} className={styles.chev} />
+        </button>
+      </div>
+
+      <SectionTitle>{t('dataBackup')}</SectionTitle>
       <div className={`card ${styles.group}`}>
         <button type="button" className={styles.item} onClick={exportJSON}>
           <Icon name="download" size={18} />
           <span className={styles.itemMain}>
-            <b>导出 JSON 备份</b>
-            <i>完整数据，可用于恢复或迁移到其他设备</i>
+            <b>{t('exportJson')}</b>
+            <i>{t('exportJsonHint')}</i>
           </span>
           <Icon name="chevron-right" size={15} className={styles.chev} />
         </button>
         <button type="button" className={styles.item} onClick={exportCSV}>
           <Icon name="download" size={18} />
           <span className={styles.itemMain}>
-            <b>导出 CSV 记录</b>
-            <i>全部记录明细，可用表格软件打开分析</i>
+            <b>{t('exportCsv')}</b>
+            <i>{t('exportCsvHint')}</i>
           </span>
           <Icon name="chevron-right" size={15} className={styles.chev} />
         </button>
         <button type="button" className={styles.item} onClick={() => fileRef.current?.click()}>
           <Icon name="upload" size={18} />
           <span className={styles.itemMain}>
-            <b>导入备份</b>
-            <i>从 JSON 备份文件恢复，将覆盖当前数据</i>
+            <b>{t('importBackup')}</b>
+            <i>{t('importBackupHint')}</i>
           </span>
           <Icon name="chevron-right" size={15} className={styles.chev} />
         </button>
@@ -114,44 +166,55 @@ export default function SettingsPage() {
         />
       </div>
 
-      <SectionTitle>数据概览</SectionTitle>
+      <SectionTitle>{t('overview')}</SectionTitle>
       <div className={`card ${styles.overview}`}>
         <div>
           <b className="num">{db.habits.length}</b>
-          <span>计划</span>
+          <span>{t('habitsCount')}</span>
+        </div>
+        <div>
+          <b className="num">{db.projects.length}</b>
+          <span>{t('projects')}</span>
         </div>
         <div>
           <b className="num">{recordCount}</b>
-          <span>记录</span>
+          <span>{t('recordsCount')}</span>
         </div>
         <div>
           <b className="num">{storageKB} KB</b>
-          <span>占用</span>
+          <span>{t('storageUsed')}</span>
         </div>
       </div>
-      <p className={styles.storageNote}>数据仅保存在本浏览器（localStorage）中，更换设备请使用 JSON 备份迁移。</p>
+      <p className={styles.storageNote}>{t('storageNote')}</p>
 
-      <SectionTitle>危险区域</SectionTitle>
+      <SectionTitle>{t('dangerZone')}</SectionTitle>
       <div className={`card ${styles.group}`}>
         <button type="button" className={styles.item} onClick={onClear}>
           <Icon name="trash" size={18} className={styles.dangerIcon} />
           <span className={styles.itemMain}>
-            <b className={styles.dangerText}>清空全部数据</b>
-            <i>删除所有计划与记录，不可恢复</i>
+            <b className={styles.dangerText}>{t('clearData')}</b>
+            <i>{t('clearDataHint')}</i>
           </span>
         </button>
       </div>
 
-      <SectionTitle>关于</SectionTitle>
+      <SectionTitle>{t('about')}</SectionTitle>
       <div className={`card ${styles.about}`}>
         <span className="brand-seal" style={{ width: 36, height: 36, fontSize: 19 }}>
           迹
         </span>
         <div className={styles.aboutText}>
-          <b>循迹 Trace</b> <span className="faint">v1.0.0</span>
-          <p>记录与追踪你的习惯和计划。纸页之间，看见坚持的痕迹。</p>
+          <b>{t('appName')} Trace</b> <span className="faint">V1.1-rc.1</span>
+          <p>{t('aboutText')}</p>
         </div>
       </div>
+
+      {editor && (
+        <ProjectEditor
+          project={editor === 'new' ? undefined : editor}
+          onClose={() => setEditor(null)}
+        />
+      )}
     </div>
   );
 }
