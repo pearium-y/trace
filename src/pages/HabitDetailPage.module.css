@@ -6,8 +6,36 @@
 .goalLine {
   font-size: 13px;
   color: var(--ink-soft);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   letter-spacing: 0.05em;
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.habitNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 15px;
+  color: var(--ink-soft);
+}
+
+.habitNote svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--ink-faint);
+}
+
+.habitNote p {
+  font-size: 13.5px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .statsGrid {

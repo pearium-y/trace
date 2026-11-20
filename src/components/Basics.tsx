@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useStore } from '../store';
 
 export function Segmented<T extends string>({
   value,
@@ -45,8 +46,9 @@ export function StampSeal({ text = '迹', size = 68 }: { text?: string; size?: n
 }
 
 export function SealDone({ size = 27 }: { size?: number }) {
+  const { t } = useStore();
   return (
-    <span className="seal-done" style={{ width: size, height: size }} aria-label="已完成">
+    <span className="seal-done" style={{ width: size, height: size }} aria-label={t('recorded')}>
       <svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M5 13l4.2 4.2L19 7.5" />
       </svg>

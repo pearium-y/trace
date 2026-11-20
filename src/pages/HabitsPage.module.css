@@ -73,6 +73,20 @@
   color: var(--ink-faint);
 }
 
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.noMatch {
+  text-align: center;
+  padding: 28px 0 10px;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+
 @media (min-width: 900px) {
   .list {
     grid-template-columns: 1fr;

@@ -9,6 +9,22 @@
   letter-spacing: 0.04em;
 }
 
+.langWrap {
+  max-width: 280px;
+}
+
+.addIcon {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  border: 1.5px dashed var(--line);
+  color: var(--ink-soft);
+}
+
 .group {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useStore } from '../store';
 import { Icon } from './Icon';
 import styles from './Sheet.module.css';
 
@@ -13,6 +14,7 @@ export function Sheet({
   onClose: () => void;
   children: ReactNode;
 }) {
+  const { t } = useStore();
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -38,7 +40,7 @@ export function Sheet({
         {title && (
           <div className={styles.head}>
             <div className={styles.title}>{title}</div>
-            <button className="icon-btn" onClick={onClose} aria-label="关闭">
+            <button className="icon-btn" onClick={onClose} aria-label={t('close')}>
               <Icon name="close" size={18} />
             </button>
           </div>

@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useStore } from '../store';
-import type { Frequency, GoalType, HabitColor } from '../types';
+import { DEFAULT_PROJECT_ID } from '../storage';
+import type { Frequency, GoalType, PaletteColor, Tag } from '../types';
 import { Segmented } from '../components/Basics';
 import { HabitCard } from '../components/HabitCard';
 import { Icon } from '../components/Icon';
-import { COLOR_KEYS, EMOJIS, HABIT_COLORS } from '../utils/colors';
+import { TagSheet } from '../components/TagSheet';
+import { COLOR_KEYS, colorOf, EMOJIS, paletteLabel, projectLabel, tagLabel } from '../utils/colors';
 import { today } from '../utils/date';
 import styles from './HabitFormPage.module.css';
 
@@ -13,17 +15,28 @@ export default function HabitFormPage({
   habitId,
   onBack,
   onDeleted,
+  onCreated,
 }: {
   habitId?: string;
   onBack: () => void;
   onDeleted: () => void;
+  onCreated?: (id: string) => void;
 }) {
-  const { db, addHabit, updateHabit, deleteHabit } = useStore();
+  const { db, t, activeProjectId, addHabit, updateHabit, deleteHabit } = useStore();
   const existing = habitId ? db.habits.find((h) => h.id === habitId) : undefined;
+
+  const initialProject =
+    existing?.projectId ??
+    (activeProjectId && db.projects.some((p) => p.id === activeProjectId)
+      ? activeProjectId
+      : db.projects[0]?.id ?? DEFAULT_PROJECT_ID);
 
   const [name, setName] = useState(existing?.name ?? '');
   const [emoji, setEmoji] = useState(existing?.emoji ?? '📖');
-  const [color, setColor] = useState<HabitColor>(existing?.color ?? 'seal');
+  const [color, setColor] = useState<PaletteColor>(existing?.color ?? 'seal');
+  const [projectId, setProjectId] = useState(initialProject);
+  const [tagIds, setTagIds] = useState<string[]>(existing?.tagIds ?? []);
+  const [notes, setNotes] = useState(existing?.notes ?? '');
   const [frequency, setFrequency] = useState<Frequency>(existing?.frequency ?? 'daily');
   const [goalType, setGoalType] = useState<GoalType>(existing?.goalType ?? 'count');
   const [countTarget, setCountTarget] = useState(
@@ -36,40 +49,63 @@ export default function HabitFormPage({
     (existing && existing.goalType === 'duration' ? existing.target : 30) % 60,
   );
   const [error, setError] = useState('');
+  const [tagOpen, setTagOpen] = useState(false);
+
+  const projectTags = db.tags.filter((tag) => tag.projectId === projectId);
+  const validTagIds = tagIds.filter((id) => projectTags.some((tag) => tag.id === id));
+  const selectedTags: Tag[] = validTagIds
+    .map((id) => projectTags.find((tag) => tag.id === id))
+    .filter((tag): tag is Tag => !!tag);
 
   const durationTarget = durH * 60 + durM;
   const finalTarget = goalType === 'count' ? countTarget : goalType === 'duration' ? durationTarget : 0;
 
+  const toggleTag = (id: string) => {
+    setTagIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
   const submit = () => {
     const n = name.trim();
     if (!n) {
-      setError('请填写计划名称');
+      setError(t('errorNameRequired'));
       return;
     }
     if (n.length > 20) {
-      setError('名称不能超过 20 个字');
+      setError(t('errorNameTooLong'));
       return;
     }
     if (goalType === 'count' && countTarget < 1) {
-      setError('次数目标至少为 1 次');
+      setError(t('errorCountMin'));
       return;
     }
     if (goalType === 'duration' && durationTarget < 1) {
-      setError('时长目标至少 1 分钟');
+      setError(t('errorDurationMin'));
       return;
     }
-    const input = { name: n, emoji, color, frequency, goalType, target: finalTarget };
+    const input = {
+      name: n,
+      emoji,
+      color,
+      projectId,
+      tagIds: validTagIds,
+      notes: notes.trim() || undefined,
+      frequency,
+      goalType,
+      target: finalTarget,
+    };
     if (existing) {
       updateHabit(existing.id, input);
+      onBack();
     } else {
-      addHabit(input);
+      const habit = addHabit(input);
+      if (onCreated) onCreated(habit.id);
+      else onBack();
     }
-    onBack();
   };
 
   const remove = () => {
     if (!existing) return;
-    if (window.confirm(`确定删除「${existing.name}」吗？它的所有记录将一并删除。`)) {
+    if (window.confirm(t('deleteHabitConfirm', { name: existing.name }))) {
       deleteHabit(existing.id);
       onDeleted();
     }
@@ -77,9 +113,12 @@ export default function HabitFormPage({
 
   const preview = {
     id: 'preview',
-    name: name.trim() || '计划名称',
+    projectId,
+    name: name.trim() || t('previewName'),
     emoji,
     color,
+    tagIds: validTagIds,
+    notes: notes.trim() || undefined,
     frequency,
     goalType,
     target: finalTarget,
@@ -89,30 +128,36 @@ export default function HabitFormPage({
   return (
     <div>
       <header className="subheader">
-        <button className="icon-btn" onClick={onBack} aria-label="返回">
+        <button className="icon-btn" onClick={onBack} aria-label={t('back')}>
           <Icon name="back" />
         </button>
-        <div className="subheader-title">{existing ? '编辑计划' : '新建计划'}</div>
+        <div className="subheader-title">{existing ? t('editHabit') : t('newHabit')}</div>
         {existing && (
-          <button className="icon-btn" onClick={remove} aria-label="删除计划" title="删除计划">
+          <button className="icon-btn" onClick={remove} aria-label={t('deleteHabit')} title={t('deleteHabit')}>
             <Icon name="trash" />
           </button>
         )}
       </header>
 
       <div className={styles.previewWrap}>
-        <HabitCard habit={preview} records={{}} date={today()} onOpen={() => undefined} />
-        <p className="faint">卡片预览</p>
+        <HabitCard
+          habit={preview}
+          records={{}}
+          date={today()}
+          tags={selectedTags}
+          onOpen={() => undefined}
+        />
+        <p className="faint">{t('cardPreview')}</p>
       </div>
 
       <div className="field">
         <label className="field-label" htmlFor="habit-name">
-          名称
+          {t('name')}
         </label>
         <input
           id="habit-name"
           className="input"
-          placeholder="例如：读书、跑步、冥想…"
+          placeholder={t('namePlaceholder')}
           maxLength={20}
           value={name}
           onChange={(e) => {
@@ -123,7 +168,29 @@ export default function HabitFormPage({
       </div>
 
       <div className="field">
-        <span className="field-label">图标</span>
+        <label className="field-label" htmlFor="habit-project">
+          {t('selectProject')}
+        </label>
+        <select
+          id="habit-project"
+          className="select"
+          style={{ width: '100%' }}
+          value={projectId}
+          onChange={(e) => {
+            setProjectId(e.target.value);
+            setTagIds([]);
+          }}
+        >
+          {db.projects.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.emoji} {projectLabel(p, t)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="field">
+        <span className="field-label">{t('icon')}</span>
         <div className={styles.emojiGrid}>
           {EMOJIS.map((e) => (
             <button
@@ -139,10 +206,10 @@ export default function HabitFormPage({
       </div>
 
       <div className="field">
-        <span className="field-label">专属色（用于热力图）</span>
+        <span className="field-label">{t('habitColor')}</span>
         <div className={styles.colorRow}>
           {COLOR_KEYS.map((c) => {
-            const def = HABIT_COLORS[c];
+            const def = colorOf(c);
             return (
               <button
                 key={c}
@@ -150,8 +217,8 @@ export default function HabitFormPage({
                 className={`${styles.colorDot} ${c === color ? styles.colorOn : ''}`}
                 style={{ background: def.accent } as CSSProperties}
                 onClick={() => setColor(c)}
-                title={def.label}
-                aria-label={def.label}
+                title={paletteLabel(c, t)}
+                aria-label={paletteLabel(c, t)}
               />
             );
           })}
@@ -159,26 +226,64 @@ export default function HabitFormPage({
       </div>
 
       <div className="field">
-        <span className="field-label">频率</span>
+        <div className={styles.tagHead}>
+          <span className="field-label" style={{ marginBottom: 0 }}>
+            {t('tags')}
+          </span>
+          <button type="button" className={styles.manageBtn} onClick={() => setTagOpen(true)}>
+            <Icon name="tag" size={14} /> {t('manageTags')}
+          </button>
+        </div>
+        {projectTags.length === 0 ? (
+          <p className={styles.tagHint}>{t('noTagsHint')}</p>
+        ) : (
+          <div className={styles.tagWrap}>
+            {projectTags.map((tag) => {
+              const on = validTagIds.includes(tag.id);
+              const def = colorOf(tag.color);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  className={`${styles.tagChip} ${on ? styles.tagOn : ''}`}
+                  style={
+                    on
+                      ? ({ borderColor: def.accent, color: def.deep, background: `${def.accent}1a` } as CSSProperties)
+                      : undefined
+                  }
+                  onClick={() => toggleTag(tag.id)}
+                >
+                  <i className={styles.tagDot} style={{ background: def.accent }} />
+                  {tagLabel(tag, t)}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <p className={styles.tagHint}>{t('tagsHint')}</p>
+      </div>
+
+      <div className="field">
+        <span className="field-label">{t('frequency')}</span>
         <Segmented
           value={frequency}
           onChange={setFrequency}
           options={[
-            { value: 'daily', label: '每日' },
-            { value: 'weekly', label: '每周' },
+            { value: 'daily', label: t('daily') },
+            { value: 'weekly', label: t('weekly') },
           ]}
         />
       </div>
 
       <div className="field">
-        <span className="field-label">目标</span>
+        <span className="field-label">{t('goal')}</span>
         <Segmented
           value={goalType}
           onChange={setGoalType}
           options={[
-            { value: 'count', label: '完成次数' },
-            { value: 'duration', label: '累计时长' },
-            { value: 'none', label: '无目标' },
+            { value: 'count', label: t('goalCount') },
+            { value: 'duration', label: t('goalDuration') },
+            { value: 'none', label: t('goalNone') },
           ]}
         />
       </div>
@@ -186,7 +291,7 @@ export default function HabitFormPage({
       {goalType === 'count' && (
         <div className="field">
           <label className="field-label" htmlFor="count-target">
-            {frequency === 'daily' ? '每天' : '每周'}目标次数
+            {frequency === 'daily' ? t('targetCountDaily') : t('targetCountWeekly')}
           </label>
           <div className={styles.targetRow}>
             <input
@@ -199,14 +304,16 @@ export default function HabitFormPage({
               value={countTarget}
               onChange={(e) => setCountTarget(Math.max(1, Math.min(99, Math.floor(Number(e.target.value) || 1))))}
             />
-            <span className={styles.targetUnit}>次</span>
+            <span className={styles.targetUnit}>{t('unitTimes')}</span>
           </div>
         </div>
       )}
 
       {goalType === 'duration' && (
         <div className="field">
-          <label className="field-label">{frequency === 'daily' ? '每天' : '每周'}目标时长</label>
+          <label className="field-label">
+            {frequency === 'daily' ? t('targetDurationDaily') : t('targetDurationWeekly')}
+          </label>
           <div className={styles.targetRow}>
             <input
               className="input"
@@ -216,9 +323,9 @@ export default function HabitFormPage({
               inputMode="numeric"
               value={durH}
               onChange={(e) => setDurH(Math.max(0, Math.min(40, Math.floor(Number(e.target.value) || 0))))}
-              aria-label="小时"
+              aria-label={t('hours')}
             />
-            <span className={styles.targetUnit}>小时</span>
+            <span className={styles.targetUnit}>{t('hours')}</span>
             <input
               className="input"
               type="number"
@@ -227,24 +334,38 @@ export default function HabitFormPage({
               inputMode="numeric"
               value={durM}
               onChange={(e) => setDurM(Math.max(0, Math.min(59, Math.floor(Number(e.target.value) || 0))))}
-              aria-label="分钟"
+              aria-label={t('minutes')}
             />
-            <span className={styles.targetUnit}>分钟</span>
+            <span className={styles.targetUnit}>{t('minutes')}</span>
           </div>
         </div>
       )}
 
-      {goalType === 'none' && (
-        <p className={styles.noneHint}>无目标计划只需每天标记「已记录」，也可写下备注。</p>
-      )}
+      {goalType === 'none' && <p className={styles.noneHint}>{t('goalNoneHint')}</p>}
+
+      <div className="field">
+        <label className="field-label" htmlFor="habit-notes">
+          {t('habitNote')}
+        </label>
+        <textarea
+          id="habit-notes"
+          className="textarea"
+          maxLength={500}
+          placeholder={t('habitNotePlaceholder')}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+      </div>
 
       {error && <p className="field-error">{error}</p>}
 
       <div className={styles.savebar}>
         <button className="btn btn-primary btn-block" onClick={submit}>
-          <Icon name="check" size={16} /> {existing ? '保存修改' : '创建计划'}
+          <Icon name="check" size={16} /> {existing ? t('updateHabitBtn') : t('createHabitBtn')}
         </button>
       </div>
+
+      {tagOpen && <TagSheet projectId={projectId} onClose={() => setTagOpen(false)} />}
     </div>
   );
 }

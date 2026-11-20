@@ -85,6 +85,13 @@
   color: var(--bamboo);
 }
 
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
 .quickAdd {
   flex: none;
   width: 52px;

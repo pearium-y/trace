@@ -1,27 +1,49 @@
+import { useStore } from '../store';
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
 import styles from './BottomNav.module.css';
 
 export type TabKey = 'today' | 'habits' | 'report' | 'settings';
 
-export const TABS: { key: TabKey; label: string; icon: IconName }[] = [
-  { key: 'today', label: '今日', icon: 'today' },
-  { key: 'habits', label: '计划', icon: 'habits' },
-  { key: 'report', label: '报告', icon: 'report' },
-  { key: 'settings', label: '设置', icon: 'settings' },
-];
+export const TAB_KEYS: TabKey[] = ['today', 'habits', 'report', 'settings'];
 
-export function BottomNav({ active, onSelect }: { active: TabKey; onSelect: (t: TabKey) => void }) {
+const TAB_ICONS: Record<TabKey, IconName> = {
+  today: 'today',
+  habits: 'habits',
+  report: 'report',
+  settings: 'settings',
+};
+
+const TAB_LABELS: Record<TabKey, string> = {
+  today: 'tabToday',
+  habits: 'tabHabits',
+  report: 'tabReport',
+  settings: 'tabSettings',
+};
+
+export function useTabs() {
+  const { t } = useStore();
+  return TAB_KEYS.map((key) => ({ key, label: t(TAB_LABELS[key]), icon: TAB_ICONS[key] }));
+}
+
+export function BottomNav({
+  active,
+  onSelect,
+}: {
+  active: TabKey;
+  onSelect: (t: TabKey) => void;
+}) {
+  const tabs = useTabs();
   return (
     <nav className={styles.nav}>
-      {TABS.map((t) => (
+      {tabs.map((tab) => (
         <button
-          key={t.key}
-          className={`${styles.item} ${active === t.key ? styles.active : ''}`}
-          onClick={() => onSelect(t.key)}
+          key={tab.key}
+          className={`${styles.item} ${active === tab.key ? styles.active : ''}`}
+          onClick={() => onSelect(tab.key)}
         >
-          <Icon name={t.icon} size={22} />
-          <span>{t.label}</span>
+          <Icon name={tab.icon} size={22} />
+          <span>{tab.label}</span>
         </button>
       ))}
     </nav>
