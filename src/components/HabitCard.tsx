@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
-import type { Habit, RecordMap } from '../types';
-import { HABIT_COLORS } from '../utils/colors';
+import type { Habit, RecordMap, Tag } from '../types';
+import { useStore } from '../store';
+import { colorOf, tagLabel } from '../utils/colors';
 import { fmtDuration } from '../utils/format';
 import { computeStreak, dayRatio, dayValue, isDayMet, weekValueSum } from '../utils/stats';
 import { ProgressBar, SealDone, StampSeal } from './Basics';
@@ -12,6 +13,8 @@ export function HabitCard({
   records,
   date,
   stampKey,
+  tags = [],
+  projectName,
   onOpen,
   onQuickAdd,
 }: {
@@ -20,10 +23,13 @@ export function HabitCard({
   date: string;
   /** 盖章动画触发的 key（变更即重放） */
   stampKey?: number;
+  tags?: Tag[];
+  projectName?: string;
   onOpen: () => void;
   onQuickAdd?: () => void;
 }) {
-  const def = HABIT_COLORS[habit.color];
+  const { t } = useStore();
+  const def = colorOf(habit.color);
   const value = dayValue(records, habit.id, date);
   const streak = computeStreak(habit, records);
   const isWeekly = habit.frequency === 'weekly';
@@ -35,28 +41,29 @@ export function HabitCard({
     const wv = weekValueSum(habit, records, date);
     ratio = habit.goalType === 'none' || habit.target <= 0 ? (wv > 0 ? 1 : 0) : wv / habit.target;
     done = ratio >= 1;
-    const v = habit.goalType === 'duration' ? fmtDuration(wv) : `${wv} 次`;
+    const v = habit.goalType === 'duration' ? fmtDuration(wv, t) : t('timesUnit', { n: wv });
     const tgt =
       habit.goalType === 'none'
         ? ''
-        : ` / ${habit.goalType === 'duration' ? fmtDuration(habit.target) : `${habit.target} 次`}`;
-    progressText = `本周 ${v}${tgt}`;
+        : ` / ${habit.goalType === 'duration' ? fmtDuration(habit.target, t) : t('timesUnit', { n: habit.target })}`;
+    progressText = `${t('weekly')} ${v}${tgt}`;
   } else {
     ratio = dayRatio(habit, records, date);
     done = isDayMet(habit, records, date);
     if (habit.goalType === 'duration') {
-      progressText = `${fmtDuration(value)} / ${fmtDuration(habit.target)}`;
+      progressText = `${fmtDuration(value, t)} / ${fmtDuration(habit.target, t)}`;
     } else if (habit.goalType === 'count') {
-      progressText = `${value} / ${habit.target} 次`;
+      progressText = `${value} / ${t('timesUnit', { n: habit.target })}`;
     } else {
-      progressText = value > 0 ? '已记录' : '未记录';
+      progressText = value > 0 ? t('recorded') : '—';
     }
   }
 
-  const todayPart =
-    isWeekly && value > 0
-      ? `今日 ${habit.goalType === 'duration' ? fmtDuration(value) : `${value} 次`}`
-      : '';
+  const todayPart = isWeekly && value > 0 ? t('dayTotal', { v: valueLabelShort() }) : '';
+
+  function valueLabelShort() {
+    return habit.goalType === 'duration' ? fmtDuration(value, t) : t('timesUnit', { n: value });
+  }
 
   return (
     <div
@@ -72,7 +79,7 @@ export function HabitCard({
           {done ? (
             <SealDone />
           ) : (
-            <span className={styles.freqBadge}>{isWeekly ? '每周' : '每日'}</span>
+            <span className={styles.freqBadge}>{isWeekly ? t('weekly') : t('daily')}</span>
           )}
         </div>
         <div className={styles.progressRow}>
@@ -82,10 +89,29 @@ export function HabitCard({
         <div className={styles.metaRow}>
           <span className={styles.streak}>
             <Icon name="flame" size={14} />
-            连续 {streak.current} {isWeekly ? '周' : '天'}
+            {t('streakInline', { n: streak.current, unit: isWeekly ? t('unitWeek') : t('unitDay') })}
           </span>
           {todayPart && <span className={styles.todayPart}>{todayPart}</span>}
         </div>
+        {(projectName || tags.length > 0) && (
+          <div className={styles.tagRow}>
+            {projectName && (
+              <span className="tagchip">
+                <Icon name="folder" size={11} />
+                {projectName}
+              </span>
+            )}
+            {tags.map((tag) => {
+              const tdef = colorOf(tag.color);
+              return (
+                <span key={tag.id} className="tagchip">
+                  <i className="dot" style={{ background: tdef.accent }} />
+                  {tagLabel(tag, t)}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </button>
       {habit.goalType === 'count' && onQuickAdd && (
         <button
@@ -93,7 +119,7 @@ export function HabitCard({
           className={styles.quickAdd}
           style={{ color: def.accent, borderColor: def.accent }}
           onClick={onQuickAdd}
-          aria-label={`${habit.name} 记一次`}
+          aria-label={t('quickAdd', { name: habit.name })}
         >
           <Icon name="plus" size={19} strokeWidth={2.2} />
         </button>

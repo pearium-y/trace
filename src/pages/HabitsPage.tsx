@@ -1,10 +1,15 @@
+import { useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useStore } from '../store';
 import { Icon } from '../components/Icon';
-import { HABIT_COLORS } from '../utils/colors';
+import { ListControls } from '../components/ListControls';
+import { colorOf, projectLabel, tagLabel } from '../utils/colors';
 import { addDays, today } from '../utils/date';
 import { fmtPct } from '../utils/format';
 import { computeStreak, goalText, habitRangeStat } from '../utils/stats';
-import type { CSSProperties } from 'react';
+import { applyList, emptyFilter } from '../utils/list';
+import type { ListFilter, SortKey, TagOption } from '../utils/list';
+import type { Habit } from '../types';
 import styles from './HabitsPage.module.css';
 
 export default function HabitsPage({
@@ -14,60 +19,130 @@ export default function HabitsPage({
   onOpen: (id: string) => void;
   onCreate: () => void;
 }) {
-  const { db } = useStore();
-  const habits = db.habits;
+  const { db, t, lang, activeProjectId } = useStore();
+  const [sort, setSort] = useState<SortKey>('default');
+  const [filter, setFilter] = useState<ListFilter>(emptyFilter());
+
+  const projectHabits = useMemo(
+    () => db.habits.filter((h) => !activeProjectId || h.projectId === activeProjectId),
+    [db.habits, activeProjectId],
+  );
+
+  const tagNamesOf = (h: Habit) =>
+    h.tagIds
+      .map((id) => db.tags.find((tag) => tag.id === id))
+      .filter((tag) => !!tag)
+      .map((tag) => tagLabel(tag, t));
+
+  const list = useMemo(
+    () => applyList(projectHabits, db.records, filter, sort, lang, tagNamesOf),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [projectHabits, db.records, db.tags, filter, sort, lang, t],
+  );
+
+  const tagOptions = useMemo<TagOption[]>(() => {
+    const source = activeProjectId
+      ? db.tags.filter((tag) => tag.projectId === activeProjectId)
+      : db.tags;
+    const map = new Map<string, TagOption>();
+    for (const tag of source) {
+      const name = tagLabel(tag, t);
+      if (!map.has(name)) map.set(name, { name, color: tag.color });
+    }
+    return [...map.values()];
+  }, [db.tags, activeProjectId, t]);
 
   return (
     <div>
       <header className="page-header">
         <h1 className="page-title">
-          计划<small>HABITS</small>
+          {t('habitsTitle')}
+          <small>HABITS</small>
         </h1>
         <button className="btn btn-primary" onClick={onCreate}>
-          <Icon name="plus" size={15} /> 新建
+          <Icon name="plus" size={15} /> {t('newHabit')}
         </button>
       </header>
 
-      {habits.length === 0 ? (
+      {projectHabits.length === 0 ? (
         <div className={`card ${styles.empty}`}>
           <div className="empty-seal">迹</div>
-          <p className="muted">还没有任何计划</p>
+          <p className="muted">{t('emptyHabits')}</p>
           <button className="btn btn-primary" onClick={onCreate}>
-            <Icon name="plus" size={16} /> 创建计划
+            <Icon name="plus" size={16} /> {t('createHabit')}
           </button>
         </div>
       ) : (
-        <div className={`${styles.list} stagger`}>
-          {habits.map((h) => {
-            const def = HABIT_COLORS[h.color];
-            const streak = computeStreak(h, db.records);
-            const stat30 = habitRangeStat(h, db.records, addDays(today(), -29), today());
-            const recordCount = Object.keys(db.records[h.id] ?? {}).length;
-            return (
-              <button
-                key={h.id}
-                className={`card tape ${styles.row}`}
-                style={{ '--tape-color': `${def.accent}55` } as CSSProperties}
-                onClick={() => onOpen(h.id)}
-              >
-                <span className={styles.emoji} style={{ background: `${def.accent}1e`, borderColor: `${def.accent}55` }}>
-                  {h.emoji}
-                </span>
-                <span className={styles.info}>
-                  <span className={styles.name}>{h.name}</span>
-                  <span className={styles.meta}>
-                    {goalText(h)} · 记录 {recordCount} 天
+        <>
+          <ListControls
+            sort={sort}
+            onSort={setSort}
+            filter={filter}
+            onFilter={setFilter}
+            tagOptions={tagOptions}
+          />
+
+          <div className={`${styles.list} stagger`}>
+            {list.map((h) => {
+              const def = colorOf(h.color);
+              const streak = computeStreak(h, db.records);
+              const stat30 = habitRangeStat(h, db.records, addDays(today(), -29), today());
+              const recordCount = Object.keys(db.records[h.id] ?? {}).length;
+              const project = db.projects.find((p) => p.id === h.projectId);
+              const tags = h.tagIds
+                .map((id) => db.tags.find((tag) => tag.id === id))
+                .filter((tag) => !!tag);
+              return (
+                <button
+                  key={h.id}
+                  className={`card tape ${styles.row}`}
+                  style={{ '--tape-color': `${def.accent}55` } as CSSProperties}
+                  onClick={() => onOpen(h.id)}
+                >
+                  <span className={styles.emoji} style={{ background: `${def.accent}1e`, borderColor: `${def.accent}55` }}>
+                    {h.emoji}
                   </span>
-                  <span className={styles.meta2}>
-                    近30天 {fmtPct(stat30.rate)} · 连续 {streak.current}
-                    {h.frequency === 'daily' ? ' 天' : ' 周'}
+                  <span className={styles.info}>
+                    <span className={styles.name}>{h.name}</span>
+                    <span className={styles.meta}>
+                      {goalText(h, t)} · {t('recordsDays', { n: recordCount })}
+                    </span>
+                    <span className={styles.meta2}>
+                      {t('last30', { pct: fmtPct(stat30.rate) })} ·{' '}
+                      {t('streakInline', {
+                        n: streak.current,
+                        unit: h.frequency === 'daily' ? t('unitDay') : t('unitWeek'),
+                      })}
+                    </span>
+                    {(tags.length > 0 || !activeProjectId) && (
+                      <span className={styles.tagRow}>
+                        {!activeProjectId && project && (
+                          <span className="tagchip">
+                            <Icon name="folder" size={11} />
+                            {projectLabel(project, t)}
+                          </span>
+                        )}
+                        {tags.map((tag) => {
+                          const tdef = colorOf(tag.color);
+                          return (
+                            <span key={tag.id} className="tagchip">
+                              <i className="dot" style={{ background: tdef.accent }} />
+                              {tagLabel(tag, t)}
+                            </span>
+                          );
+                        })}
+                      </span>
+                    )}
                   </span>
-                </span>
-                <Icon name="chevron-right" size={17} className={styles.chev} />
-              </button>
-            );
-          })}
-        </div>
+                  <Icon name="chevron-right" size={17} className={styles.chev} />
+                </button>
+              );
+            })}
+            {list.length === 0 && (
+              <p className={styles.noMatch}>{t('noMatch')}</p>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

@@ -2,28 +2,62 @@ import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { HabitCard } from '../components/HabitCard';
 import { RecordSheet } from '../components/RecordSheet';
+import { ListControls } from '../components/ListControls';
 import { Icon } from '../components/Icon';
 import { dateLabel, fullDateLabel, today, weekdayLabel } from '../utils/date';
 import { computeStreak, dayValue, overallDayRatio } from '../utils/stats';
+import { projectLabel, tagLabel } from '../utils/colors';
+import { applyList, emptyFilter } from '../utils/list';
+import type { ListFilter, SortKey, TagOption } from '../utils/list';
 import type { Habit } from '../types';
 import styles from './TodayPage.module.css';
 
 export default function TodayPage({ onCreate }: { onCreate: () => void }) {
-  const { db, setRecord, removeRecord } = useStore();
+  const { db, t, lang, activeProjectId, setRecord, removeRecord } = useStore();
   const [selDate, setSelDate] = useState(today());
   const [editing, setEditing] = useState<{ habitId: string; date: string } | null>(null);
   const [stamp, setStamp] = useState<{ habitId: string; date: string; key: number } | null>(null);
+  const [sort, setSort] = useState<SortKey>('default');
+  const [filter, setFilter] = useState<ListFilter>(emptyFilter());
 
-  const t = today();
-  const isBackfill = selDate < t;
-  const habits = db.habits;
-  const due = habits.filter((h) => h.createdAt <= selDate);
+  const t0 = today();
+  const isBackfill = selDate < t0;
+  const projectHabits = useMemo(
+    () => db.habits.filter((h) => !activeProjectId || h.projectId === activeProjectId),
+    [db.habits, activeProjectId],
+  );
+  const due = projectHabits.filter((h) => h.createdAt <= selDate);
+
+  const tagNamesOf = (h: Habit) =>
+    h.tagIds
+      .map((id) => db.tags.find((tag) => tag.id === id))
+      .filter((tag) => !!tag)
+      .map((tag) => tagLabel(tag, t));
+
+  const list = useMemo(
+    () => applyList(due, db.records, filter, sort, lang, tagNamesOf),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [due, db.records, db.tags, filter, sort, lang, t],
+  );
+
+  const tagOptions = useMemo<TagOption[]>(() => {
+    const source = activeProjectId
+      ? db.tags.filter((tag) => tag.projectId === activeProjectId)
+      : db.tags;
+    const map = new Map<string, TagOption>();
+    for (const tag of source) {
+      const name = tagLabel(tag, t);
+      if (!map.has(name)) map.set(name, { name, color: tag.color });
+    }
+    return [...map.values()];
+  }, [db.tags, activeProjectId, t]);
+
   const recordedCount = due.filter((h) => db.records[h.id]?.[selDate]).length;
 
   const streakSummary = useMemo(() => {
     let bestD = 0;
     let bestW = 0;
-    for (const h of habits) {
+    for (const h of projectHabits) {
       const s = computeStreak(h, db.records);
       if (h.frequency === 'daily') {
         if (s.current > bestD) bestD = s.current;
@@ -31,10 +65,10 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
         bestW = s.current;
       }
     }
-    if (bestD > 0) return { n: bestD, unit: '天' };
-    if (bestW > 0) return { n: bestW, unit: '周' };
+    if (bestD > 0) return { n: bestD, unit: t('unitDay') };
+    if (bestW > 0) return { n: bestW, unit: t('unitWeek') };
     return null;
-  }, [habits, db.records]);
+  }, [projectHabits, db.records, t]);
 
   useEffect(() => {
     if (!stamp) return;
@@ -42,7 +76,7 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
     return () => clearTimeout(timer);
   }, [stamp]);
 
-  const editingHabit = editing ? habits.find((h) => h.id === editing.habitId) : undefined;
+  const editingHabit = editing ? db.habits.find((h) => h.id === editing.habitId) : undefined;
   const editingRecord = editing ? db.records[editing.habitId]?.[editing.date] : undefined;
 
   const doStamp = (habitId: string, date: string) => setStamp({ habitId, date, key: Date.now() });
@@ -70,19 +104,19 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
     <div>
       <header className="page-header">
         <h1 className="page-title">
-          {isBackfill ? '补录' : '今日'}
+          {isBackfill ? t('backfillTitle') : t('todayTitle')}
           <small>
-            {fullDateLabel(selDate)} {weekdayLabel(selDate)}
+            {fullDateLabel(selDate, lang)} {weekdayLabel(selDate, lang)}
           </small>
         </h1>
         <input
           className="date-input"
           type="date"
           value={selDate}
-          max={t}
+          max={t0}
           onChange={(e) => e.target.value && setSelDate(e.target.value)}
-          aria-label="选择记录日期"
-          title="选择日期（可补录过去）"
+          aria-label={t('chooseDate')}
+          title={t('dateTitle')}
         />
       </header>
 
@@ -90,20 +124,22 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
         <div className={styles.backfillBanner}>
           <Icon name="today" size={15} />
           <span>
-            正在补录 <b>{dateLabel(selDate)}</b>（{weekdayLabel(selDate)}）的记录
+            {t('backfillBanner', {
+              date: `${dateLabel(selDate, lang)} (${weekdayLabel(selDate, lang)})`,
+            })}
           </span>
-          <button className={styles.backToday} onClick={() => setSelDate(t)}>
-            回到今天
+          <button className={styles.backToday} onClick={() => setSelDate(t0)}>
+            {t('backToToday')}
           </button>
         </div>
       )}
 
-      {habits.length === 0 ? (
+      {projectHabits.length === 0 ? (
         <div className={`card ${styles.emptyCard}`}>
           <div className="empty-seal">迹</div>
-          <p className="muted">纸页还空着，写下第一个计划吧</p>
+          <p className="muted">{t('emptyToday')}</p>
           <button className="btn btn-primary" onClick={onCreate}>
-            <Icon name="plus" size={16} /> 创建第一个计划
+            <Icon name="plus" size={16} /> {t('createFirstHabit')}
           </button>
         </div>
       ) : (
@@ -115,7 +151,7 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
                 <i>/</i>
                 {due.length}
               </b>
-              <span>今日已记录</span>
+              <span>{t('recordedToday')}</span>
             </div>
             {streakSummary && (
               <>
@@ -125,35 +161,55 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
                     {streakSummary.n}
                     <i>{streakSummary.unit}</i>
                   </b>
-                  <span>最佳连续</span>
+                  <span>{t('bestStreak')}</span>
                 </div>
               </>
             )}
             <div className={styles.sumDivider} />
             <div className={styles.sumItem}>
               <b className="num">
-                {Math.round(overallDayRatio(habits, db.records, selDate) * 100)}
+                {Math.round(overallDayRatio(projectHabits, db.records, selDate) * 100)}
                 <i>%</i>
               </b>
-              <span>今日完成度</span>
+              <span>{t('todayCompletion')}</span>
             </div>
           </div>
 
+          <ListControls
+            sort={sort}
+            onSort={setSort}
+            filter={filter}
+            onFilter={setFilter}
+            tagOptions={tagOptions}
+          />
+
           <div className={`${styles.list} stagger`}>
-            {due.map((h) => (
-              <HabitCard
-                key={h.id}
-                habit={h}
-                records={db.records}
-                date={selDate}
-                stampKey={stamp && stamp.habitId === h.id && stamp.date === selDate ? stamp.key : undefined}
-                onOpen={() => setEditing({ habitId: h.id, date: selDate })}
-                onQuickAdd={() => quickAdd(h)}
-              />
-            ))}
-            {due.length === 0 && (
+            {list.map((h) => {
+              const project = db.projects.find((p) => p.id === h.projectId);
+              const tags = h.tagIds
+                .map((id) => db.tags.find((tag) => tag.id === id))
+                .filter((tag) => !!tag);
+              return (
+                <HabitCard
+                  key={h.id}
+                  habit={h}
+                  records={db.records}
+                  date={selDate}
+                  tags={tags}
+                  projectName={activeProjectId ? undefined : project ? projectLabel(project, t) : undefined}
+                  stampKey={stamp && stamp.habitId === h.id && stamp.date === selDate ? stamp.key : undefined}
+                  onOpen={() => setEditing({ habitId: h.id, date: selDate })}
+                  onQuickAdd={() => quickAdd(h)}
+                />
+              );
+            })}
+            {list.length === 0 && (
               <p className={`${styles.noneDue} muted`}>
-                {isBackfill ? '这一天还没有可记录的计划。' : '暂无待记录的计划。'}
+                {due.length === 0
+                  ? isBackfill
+                    ? t('noneDueBackfill')
+                    : t('noneDue')
+                  : t('noMatch')}
               </p>
             )}
           </div>

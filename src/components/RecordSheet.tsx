@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Habit } from '../types';
+import { useStore } from '../store';
 import { fullDateLabel, relativeDayLabel } from '../utils/date';
 import { fmtDuration } from '../utils/format';
 import { goalText } from '../utils/stats';
@@ -24,6 +25,7 @@ export function RecordSheet({
   onSave: (value: number, note: string) => void;
   onRemove?: () => void;
 }) {
+  const { lang, t } = useStore();
   const isDuration = habit.goalType === 'duration';
   const isNone = habit.goalType === 'none';
   const [value, setValue] = useState(initial?.value ?? 0);
@@ -47,7 +49,7 @@ export function RecordSheet({
       onClose={onClose}
     >
       <div className={styles.date}>
-        {relativeDayLabel(date)} · {fullDateLabel(date)}
+        {relativeDayLabel(date, lang)} · {fullDateLabel(date, lang)}
       </div>
 
       {isNone ? (
@@ -59,10 +61,10 @@ export function RecordSheet({
           >
             {value > 0 ? (
               <>
-                <Icon name="check" size={18} /> 已记录
+                <Icon name="check" size={18} /> {t('recorded')}
               </>
             ) : (
-              '标记为已记录'
+              t('markRecorded')
             )}
           </button>
         </div>
@@ -76,7 +78,7 @@ export function RecordSheet({
                 className={`${styles.chip} ${value === m ? styles.chipOn : ''}`}
                 onClick={() => setValue(m)}
               >
-                {m >= 60 ? `${m / 60}小时` : `${m}分`}
+                {m >= 60 ? t('durationH', { h: m / 60 }) : t('durationM', { m })}
               </button>
             ))}
           </div>
@@ -88,10 +90,9 @@ export function RecordSheet({
                 max={23}
                 inputMode="numeric"
                 value={hours}
-                onFocus={(e) => e.target.select()}
                 onChange={(e) => setDurationParts(Number(e.target.value) || 0, mins)}
               />
-              <span>小时</span>
+              <span>{t('hours')}</span>
             </label>
             <label className={styles.hmItem}>
               <input
@@ -100,12 +101,11 @@ export function RecordSheet({
                 max={59}
                 inputMode="numeric"
                 value={mins}
-                onFocus={(e) => e.target.select()}
                 onChange={(e) => setDurationParts(hours, Number(e.target.value) || 0)}
               />
-              <span>分钟</span>
+              <span>{t('minutes')}</span>
             </label>
-            <span className={styles.hmTotal}>当日累计 {fmtDuration(value)}</span>
+            <span className={styles.hmTotal}>{t('dayTotal', { v: fmtDuration(value, t) })}</span>
           </div>
         </div>
       ) : (
@@ -114,7 +114,7 @@ export function RecordSheet({
             type="button"
             className={styles.stepBtn}
             onClick={() => setValue(Math.max(0, value - 1))}
-            aria-label="减一"
+            aria-label={t('dec')}
           >
             −
           </button>
@@ -125,37 +125,35 @@ export function RecordSheet({
             max={999}
             inputMode="numeric"
             value={value}
-            onFocus={(e) => e.target.select()}
             onChange={(e) => setValue(Math.max(0, Math.min(999, Math.floor(Number(e.target.value) || 0))))}
           />
           <button
             type="button"
             className={styles.stepBtn}
             onClick={() => setValue(Math.min(999, value + 1))}
-            aria-label="加一"
+            aria-label={t('inc')}
           >
             +
           </button>
-          <span className={styles.countUnit}>次</span>
+          <span className={styles.countUnit}>{t('unitTimes')}</span>
         </div>
       )}
 
       <div className={styles.hints}>
-        <span>目标 · {goalText(habit)}</span>
-        {habit.frequency === 'weekly' && <span>按日录入，本周进度自动累计</span>}
+        <span>{t('targetInline', { goal: goalText(habit, t) })}</span>
+        {habit.frequency === 'weekly' && <span>{t('weeklyHint')}</span>}
       </div>
 
       <div className={`field ${styles.noteField}`}>
         <label className="field-label" htmlFor="rec-note">
-          备注（可选）
+          {t('noteOptional')}
         </label>
         <textarea
           id="rec-note"
           className="textarea"
           maxLength={200}
-          placeholder="记录这一笔的完成情况…"
+          placeholder={t('notePlaceholder')}
           value={note}
-          onFocus={(e) => e.target.select()}
           onChange={(e) => setNote(e.target.value)}
         />
         <div className={styles.noteCount}>{note.length}/200</div>
@@ -169,13 +167,13 @@ export function RecordSheet({
               onRemove();
             }}
           >
-            <Icon name="trash" size={15} /> 删除记录
+            <Icon name="trash" size={15} /> {t('deleteRecord')}
           </button>
         ) : (
           <span />
         )}
         <button className="btn btn-primary" onClick={() => onSave(value, note.trim())}>
-          保存
+          {t('save')}
         </button>
       </div>
     </Sheet>

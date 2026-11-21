@@ -1,0 +1,156 @@
+import { useState } from 'react';
+import type { CSSProperties } from 'react';
+import { useStore } from '../store';
+import type { PaletteColor, Tag } from '../types';
+import { COLOR_KEYS, colorOf, paletteLabel, tagLabel } from '../utils/colors';
+import { Icon } from './Icon';
+import { Sheet } from './Sheet';
+import styles from './TagSheet.module.css';
+
+function TagForm({
+  projectId,
+  tag,
+  onDone,
+}: {
+  projectId: string;
+  tag?: Tag;
+  onDone: () => void;
+}) {
+  const { db, t, addTag, updateTag } = useStore();
+  const [name, setName] = useState(tag && !tag.preset ? tag.name : '');
+  const [color, setColor] = useState<PaletteColor>(tag?.color ?? 'seal');
+  const [error, setError] = useState('');
+
+  const submit = () => {
+    const n = name.trim();
+    if (!n) {
+      setError(t('tagNameRequired'));
+      return;
+    }
+    const dup = db.tags.some(
+      (x) =>
+        x.projectId === projectId &&
+        x.id !== tag?.id &&
+        tagLabel(x, t).toLowerCase() === n.toLowerCase(),
+    );
+    if (dup) {
+      setError(t('tagExists'));
+      return;
+    }
+    if (tag) {
+      updateTag(tag.id, tag.preset ? { color } : { name: n, color });
+    } else {
+      addTag(projectId, { name: n, color });
+    }
+    onDone();
+  };
+
+  return (
+    <>
+      <div className="field">
+        <label className="field-label" htmlFor="tag-name">
+          {t('tagName')}
+        </label>
+        <input
+          id="tag-name"
+          className="input"
+          maxLength={12}
+          placeholder={t('tagNamePlaceholder')}
+          value={tag?.preset ? tagLabel(tag, t) : name}
+          disabled={!!tag?.preset}
+          onChange={(e) => {
+            setName(e.target.value);
+            setError('');
+          }}
+        />
+        {tag?.preset && <p className={styles.hint}>{t('builtinTagHint')}</p>}
+        {error && <p className="field-error">{error}</p>}
+      </div>
+
+      <div className="field">
+        <span className="field-label">{t('tagColor')}</span>
+        <div className="color-row">
+          {COLOR_KEYS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`color-dot ${c === color ? 'on' : ''}`}
+              style={{ background: colorOf(c).accent } as CSSProperties}
+              onClick={() => setColor(c)}
+              title={paletteLabel(c, t)}
+              aria-label={paletteLabel(c, t)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.footer}>
+        <button className="btn btn-ghost" onClick={onDone}>
+          {t('back')}
+        </button>
+        <button className="btn btn-primary" onClick={submit}>
+          <Icon name="check" size={15} /> {t('save')}
+        </button>
+      </div>
+    </>
+  );
+}
+
+export function TagSheet({ projectId, onClose }: { projectId: string; onClose: () => void }) {
+  const { db, t, deleteTag } = useStore();
+  const tags = db.tags.filter((tag) => tag.projectId === projectId);
+  const [editing, setEditing] = useState<Tag | 'new' | null>(null);
+
+  return (
+    <Sheet title={t('manageTags')} onClose={onClose}>
+      {editing ? (
+        <TagForm
+          key={editing === 'new' ? 'new' : editing.id}
+          projectId={projectId}
+          tag={editing === 'new' ? undefined : editing}
+          onDone={() => setEditing(null)}
+        />
+      ) : (
+        <>
+          <div className={styles.list}>
+            {tags.map((tag) => {
+              const def = colorOf(tag.color);
+              return (
+                <div key={tag.id} className={styles.row}>
+                  <i className={styles.dot} style={{ background: def.accent }} />
+                  <span className={styles.name}>{tagLabel(tag, t)}</span>
+                  <button
+                    type="button"
+                    className={styles.rowBtn}
+                    onClick={() => setEditing(tag)}
+                    aria-label={t('editTag')}
+                  >
+                    <Icon name="edit" size={15} />
+                  </button>
+                  {!tag.preset && (
+                    <button
+                      type="button"
+                      className={`${styles.rowBtn} ${styles.danger}`}
+                      onClick={() => {
+                        if (window.confirm(t('deleteTagConfirm', { name: tagLabel(tag, t) }))) {
+                          deleteTag(tag.id);
+                        }
+                      }}
+                      aria-label={t('deleteTag')}
+                    >
+                      <Icon name="trash" size={15} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+            {tags.length === 0 && <p className={styles.empty}>{t('noTags')}</p>}
+          </div>
+          <button className="btn btn-primary btn-block" onClick={() => setEditing('new')}>
+            <Icon name="plus" size={15} /> {t('newTag')}
+          </button>
+        </>
+      )}
+    </Sheet>
+  );
+}
