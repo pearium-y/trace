@@ -160,7 +160,7 @@ export default function App() {
         body={
           failed
             ? '迁移失败：旧数据无法解析。 Migration failed: old data could not be parsed.'
-            : '本次更新为破坏性变更。你可以将旧数据迁移到新版本（所有标签归入默认标签，所有习惯归入默认项目），或退出网页。 This is a breaking update: migrate old data into the new version, or exit the page.'
+            : '本次更新为破坏性变更。你可以将旧数据迁移到新版本（所有习惯归入默认项目，不保留旧标签），或退出网页。 This is a breaking update: migrate old data into the new version, or exit the page.'
         }
         actions={
           <>

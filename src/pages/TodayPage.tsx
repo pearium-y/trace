@@ -6,7 +6,7 @@ import { ListControls } from '../components/ListControls';
 import { Icon } from '../components/Icon';
 import { dateLabel, fullDateLabel, today, weekdayLabel } from '../utils/date';
 import { computeStreak, dayValue, overallDayRatio } from '../utils/stats';
-import { projectLabel, tagLabel } from '../utils/colors';
+import { projectLabel } from '../utils/colors';
 import { applyList, emptyFilter } from '../utils/list';
 import type { ListFilter, SortKey, TagOption } from '../utils/list';
 import type { Habit } from '../types';
@@ -32,7 +32,7 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
     h.tagIds
       .map((id) => db.tags.find((tag) => tag.id === id))
       .filter((tag) => !!tag)
-      .map((tag) => tagLabel(tag, t));
+      .map((tag) => tag.name);
 
   const list = useMemo(
     () => applyList(due, db.records, filter, sort, lang, tagNamesOf),
@@ -46,7 +46,7 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
       : db.tags;
     const map = new Map<string, TagOption>();
     for (const tag of source) {
-      const name = tagLabel(tag, t);
+      const name = tag.name;
       if (!map.has(name)) map.set(name, { name, color: tag.color });
     }
     return [...map.values()];

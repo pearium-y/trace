@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import type { ReactNode } from 'react';
 import type { DB, Habit, Lang, PaletteColor, Project, Tag } from './types';
-import { createDefaultDB, DEFAULT_PROJECT_ID, loadDB, makePresetTags, saveDB } from './storage';
+import { createDefaultDB, DEFAULT_PROJECT_ID, loadDB, saveDB } from './storage';
 import { today } from './utils/date';
 import { makeT } from './i18n';
 import type { T } from './i18n';
@@ -38,7 +38,6 @@ function reducer(db: DB, action: Action): DB {
       return {
         ...db,
         projects: [...db.projects, action.project],
-        tags: [...db.tags, ...makePresetTags(action.project.id)],
         activeProjectId: action.project.id,
       };
     case 'updateProject':
@@ -72,8 +71,6 @@ function reducer(db: DB, action: Action): DB {
         tags: db.tags.map((t) => (t.id === action.id ? { ...t, ...action.patch } : t)),
       };
     case 'deleteTag': {
-      const tag = db.tags.find((t) => t.id === action.id);
-      if (!tag || tag.preset) return db;
       return {
         ...db,
         tags: db.tags.filter((t) => t.id !== action.id),

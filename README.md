@@ -9,7 +9,7 @@ A paper-textured journal-style habit and plan tracking app: create habits, daily
 ### Projects & Tags
 - **Independent projects**: each project owns its own habit list, heatmaps, reports and tags; switch the current project at any time from the sidebar (or the top bar on mobile)
 - **All projects view**: aggregate completion heatmap and reports across every project
-- **Free-form tags**: add custom text tags, rename them, change colors, and manage or delete them right while picking tags for a habit; built-in color tags cannot be deleted
+- **Free-form tags**: add custom text tags, rename them, change colors, and manage or delete them right while picking tags for a habit
 - One habit belongs to exactly one project
 
 ### Plan Management
@@ -102,7 +102,8 @@ npm run build
 
 - All data (projects + tags + habits + records) is stored in browser localStorage (key: `trace-data-v2`), never uploaded to any server
 - When switching devices or browsers, export a JSON backup via "Settings → Export JSON Backup" and import it in the new environment
-- Upgrading from V1.0: if legacy data (`trace-data-v1`) is detected on startup, the app asks whether to migrate it (all labels become default tags, all habits go to the default project) or exit the page
+- Upgrading from V1.0: if legacy data (`trace-data-v1`) is detected on startup, the app asks whether to migrate it (all habits go to the default project, old labels are not carried over) or exit the page
+- Upgrading from 1.1.0-rc.1: built-in default tags are removed automatically, while tags you created yourself are kept
 - "Settings → Clear All Data" deletes all plans and records (requires double confirmation; backup is recommended)
 
 ## Project Structure

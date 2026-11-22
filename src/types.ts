@@ -4,9 +4,6 @@ export type GoalType = 'none' | 'count' | 'duration';
 /** 调色板（习惯专属色 / 标签色 / 项目色共用） */
 export type PaletteColor = 'seal' | 'ochre' | 'bamboo' | 'indigo' | 'wisteria' | 'ink';
 
-/** 内置标签的预设键，与调色板一致 */
-export type TagPreset = PaletteColor;
-
 export type Lang = 'zh' | 'en';
 
 export interface Project {
@@ -24,8 +21,6 @@ export interface Tag {
   projectId: string;
   name: string;
   color: PaletteColor;
-  /** 内置标签：名称随语言变化，不可删除 */
-  preset?: TagPreset;
 }
 
 export interface Habit {

@@ -58,7 +58,6 @@ const zh: Dict = {
   tagNameRequired: '请填写标签名称',
   deleteTag: '删除标签',
   deleteTagConfirm: '确定删除标签「{name}」吗？它会从相关习惯上移除。',
-  builtinTagHint: '默认标签不可删除，但可修改颜色',
   tagsHint: '点击选择标签，可随时管理',
   noTagsHint: '该项目还没有标签，点击「管理标签」创建。',
   filterTags: '标签',
@@ -214,7 +213,7 @@ const zh: Dict = {
 
   migrationTitle: '检测到 V1.0 数据',
   migrationBody:
-    '本次更新为破坏性变更。你可以将旧数据迁移到新版本（所有标签归入默认标签，所有习惯归入默认项目），或退出网页。',
+    '本次更新为破坏性变更。你可以将旧数据迁移到新版本（所有习惯归入默认项目，不保留旧标签），或退出网页。',
   migrationMigrate: '迁移数据并进入',
   migrationExit: '退出网页',
   migrationFailed: '迁移失败：旧数据无法解析。',
@@ -222,7 +221,7 @@ const zh: Dict = {
   exitedBody: '旧数据未迁移，你可以安全关闭此标签页。',
   migrationEnTitle: 'V1.0 data detected',
   migrationEnBody:
-    'This is a breaking update. You can migrate old data (all labels become default tags, all habits go to the default project) or exit the page.',
+    'This is a breaking update. You can migrate old data (all habits go to the default project; old labels are not kept) or exit the page.',
   migrationEnMigrate: 'Migrate and continue',
   migrationEnExit: 'Exit',
 
@@ -252,13 +251,6 @@ const zh: Dict = {
   palette_indigo: '黛蓝',
   palette_wisteria: '藤紫',
   palette_ink: '玄墨',
-
-  tagPreset_seal: '朱砂',
-  tagPreset_ochre: '赭石',
-  tagPreset_bamboo: '竹青',
-  tagPreset_indigo: '黛蓝',
-  tagPreset_wisteria: '藤紫',
-  tagPreset_ink: '玄墨',
 
   durationHm: '{h}小时{m}分',
   durationH: '{h}小时',
@@ -323,7 +315,6 @@ const en: Dict = {
   tagNameRequired: 'Please enter a tag name',
   deleteTag: 'Delete tag',
   deleteTagConfirm: 'Delete tag “{name}”? It will be removed from related habits.',
-  builtinTagHint: 'Default tags cannot be deleted, but their color can be changed',
   tagsHint: 'Tap to select tags, manage them anytime',
   noTagsHint: 'This project has no tags yet. Tap “Manage tags” to create one.',
   filterTags: 'Tags',
@@ -481,7 +472,7 @@ const en: Dict = {
 
   migrationTitle: 'V1.0 data detected',
   migrationBody:
-    'This is a breaking update. You can migrate old data (all labels become default tags, all habits go to the default project) or exit the page.',
+    'This is a breaking update. You can migrate old data (all habits go to the default project; old labels are not kept) or exit the page.',
   migrationMigrate: 'Migrate and continue',
   migrationExit: 'Exit',
   migrationFailed: 'Migration failed: old data could not be parsed.',
@@ -489,7 +480,7 @@ const en: Dict = {
   exitedBody: 'Old data was not migrated. You can safely close this tab.',
   migrationEnTitle: 'V1.0 data detected',
   migrationEnBody:
-    'This is a breaking update. You can migrate old data (all labels become default tags, all habits go to the default project) or exit the page.',
+    'This is a breaking update. You can migrate old data (all habits go to the default project; old labels are not kept) or exit the page.',
   migrationEnMigrate: 'Migrate and continue',
   migrationEnExit: 'Exit',
 
@@ -519,13 +510,6 @@ const en: Dict = {
   palette_indigo: 'Indigo',
   palette_wisteria: 'Wisteria',
   palette_ink: 'Ink',
-
-  tagPreset_seal: 'Vermilion',
-  tagPreset_ochre: 'Ochre',
-  tagPreset_bamboo: 'Bamboo',
-  tagPreset_indigo: 'Indigo',
-  tagPreset_wisteria: 'Wisteria',
-  tagPreset_ink: 'Ink',
 
   durationHm: '{h}h {m}m',
   durationH: '{h}h',

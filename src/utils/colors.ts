@@ -1,4 +1,4 @@
-import type { PaletteColor, Project, Tag } from '../types';
+import type { PaletteColor, Project } from '../types';
 import type { T } from '../i18n';
 
 export interface ColorDef {
@@ -46,10 +46,6 @@ export const COLOR_KEYS = Object.keys(HABIT_COLORS) as PaletteColor[];
 export const colorOf = (c: PaletteColor): ColorDef => HABIT_COLORS[c] ?? HABIT_COLORS.seal;
 
 export const paletteLabel = (c: PaletteColor, t: T): string => t(`palette_${c}`);
-
-export function tagLabel(tag: Tag, t: T): string {
-  return tag.preset ? t(`tagPreset_${tag.preset}`) : tag.name;
-}
 
 export function projectLabel(project: Project, t: T): string {
   return project.builtin ? t('defaultProject') : project.name;

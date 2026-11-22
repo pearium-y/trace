@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import { useStore } from '../store';
 import { Icon } from '../components/Icon';
 import { ListControls } from '../components/ListControls';
-import { colorOf, projectLabel, tagLabel } from '../utils/colors';
+import { colorOf, projectLabel } from '../utils/colors';
 import { addDays, today } from '../utils/date';
 import { fmtPct } from '../utils/format';
 import { computeStreak, goalText, habitRangeStat } from '../utils/stats';
@@ -32,7 +32,7 @@ export default function HabitsPage({
     h.tagIds
       .map((id) => db.tags.find((tag) => tag.id === id))
       .filter((tag) => !!tag)
-      .map((tag) => tagLabel(tag, t));
+      .map((tag) => tag.name);
 
   const list = useMemo(
     () => applyList(projectHabits, db.records, filter, sort, lang, tagNamesOf),
@@ -46,7 +46,7 @@ export default function HabitsPage({
       : db.tags;
     const map = new Map<string, TagOption>();
     for (const tag of source) {
-      const name = tagLabel(tag, t);
+      const name = tag.name;
       if (!map.has(name)) map.set(name, { name, color: tag.color });
     }
     return [...map.values()];
@@ -127,7 +127,7 @@ export default function HabitsPage({
                           return (
                             <span key={tag.id} className="tagchip">
                               <i className="dot" style={{ background: tdef.accent }} />
-                              {tagLabel(tag, t)}
+                              {tag.name}
                             </span>
                           );
                         })}

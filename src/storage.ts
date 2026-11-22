@@ -7,21 +7,18 @@ import type {
   PaletteColor,
   Project,
   Tag,
-  TagPreset,
 } from './types';
 
 export const DB_KEY = 'trace-data-v2';
 export const LEGACY_KEY = 'trace-data-v1';
 
 export const DEFAULT_PROJECT_ID = 'project-default';
-export const PRESETS: TagPreset[] = ['seal', 'ochre', 'bamboo', 'indigo', 'wisteria', 'ink'];
-const COLORS = PRESETS;
+const COLORS: PaletteColor[] = ['seal', 'ochre', 'bamboo', 'indigo', 'wisteria', 'ink'];
+/** rc.1 自动生成的内置标签 ID 后缀（如 `project-default--tag-seal`） */
+const LEGACY_PRESET_TAG_ID_RE = /--tag-(seal|ochre|bamboo|indigo|wisteria|ink)$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null;
-
-export const presetTagId = (projectId: string, preset: TagPreset): string =>
-  `${projectId}--tag-${preset}`;
 
 export function detectLang(): Lang {
   try {
@@ -42,22 +39,12 @@ export function makeDefaultProject(): Project {
   };
 }
 
-export function makePresetTags(projectId: string): Tag[] {
-  return PRESETS.map((preset) => ({
-    id: presetTagId(projectId, preset),
-    projectId,
-    name: preset,
-    color: preset,
-    preset,
-  }));
-}
-
 export function createDefaultDB(lang: Lang = detectLang()): DB {
   const project = makeDefaultProject();
   return {
     version: 2,
     projects: [project],
-    tags: makePresetTags(project.id),
+    tags: [],
     habits: [],
     records: {},
     activeProjectId: project.id,
@@ -89,20 +76,16 @@ function parseProject(x: unknown): Project | null {
 
 function parseTag(x: unknown): Tag | null {
   if (!isObj(x)) return null;
-  const { id, projectId, name, color, preset } = x;
+  const { id, projectId, name, color } = x;
   if (typeof id !== 'string' || !id) return null;
   if (typeof projectId !== 'string' || !projectId) return null;
   if (typeof name !== 'string') return null;
   if (typeof color !== 'string' || !COLORS.includes(color as PaletteColor)) return null;
-  const p = typeof preset === 'string' && COLORS.includes(preset as PaletteColor)
-    ? (preset as TagPreset)
-    : undefined;
   return {
     id,
     projectId,
     name,
     color: color as PaletteColor,
-    preset: p,
   };
 }
 
@@ -152,7 +135,7 @@ function parseRecords(x: unknown): DB['records'] {
   return out;
 }
 
-/** 校验并修复 V2 数据（补齐默认项目/内置标签，剔除失效引用） */
+/** 校验并修复 V2 数据（补齐默认项目，剔除失效引用） */
 export function parseDB(x: unknown): DB | null {
   if (!isObj(x) || x.version !== 2) return null;
   if (!Array.isArray(x.projects) || !Array.isArray(x.tags) || !Array.isArray(x.habits)) return null;
@@ -165,16 +148,21 @@ export function parseDB(x: unknown): DB | null {
   }
   const projectIds = new Set(projects.map((p) => p.id));
 
-  const tags = (x.tags as unknown[]).map(parseTag).filter((t): t is Tag => t !== null);
+  const rawTags = x.tags as unknown[];
+  const legacyTagIds = new Set<string>();
+  for (const raw of rawTags) {
+    if (!isObj(raw) || typeof raw.id !== 'string') continue;
+    const preset = raw.preset;
+    const isLegacyPreset =
+      (typeof preset === 'string' && COLORS.includes(preset as PaletteColor)) ||
+      LEGACY_PRESET_TAG_ID_RE.test(raw.id);
+    if (isLegacyPreset) legacyTagIds.add(raw.id);
+  }
+  const tags = rawTags
+    .map(parseTag)
+    .filter((t): t is Tag => t !== null && !legacyTagIds.has(t.id));
   for (const tag of tags) {
     if (!projectIds.has(tag.projectId)) tag.projectId = DEFAULT_PROJECT_ID;
-  }
-  // 每个项目都必须拥有完整的内置标签
-  for (const project of projects) {
-    for (const preset of PRESETS) {
-      const exists = tags.some((t) => t.projectId === project.id && t.preset === preset);
-      if (!exists) tags.push(...makePresetTags(project.id).filter((t) => t.preset === preset));
-    }
   }
   const tagIds = new Set(tags.map((t) => t.id));
 
@@ -261,7 +249,6 @@ export function migrateLegacy(): DB | null {
 function migrateLegacyPayload(x: unknown): DB | null {
   if (!isObj(x) || !Array.isArray(x.habits)) return null;
   const project = makeDefaultProject();
-  const tags = makePresetTags(project.id);
   const colorSet = new Set<string>(COLORS);
 
   const habits: Habit[] = [];
@@ -284,7 +271,7 @@ function migrateLegacyPayload(x: unknown): DB | null {
       goalType,
       target: Math.floor(target),
       createdAt,
-      tagIds: [presetTagId(project.id, picked)],
+      tagIds: [],
     });
   }
 
@@ -297,7 +284,7 @@ function migrateLegacyPayload(x: unknown): DB | null {
   return {
     version: 2,
     projects: [project],
-    tags,
+    tags: [],
     habits,
     records,
     activeProjectId: project.id,

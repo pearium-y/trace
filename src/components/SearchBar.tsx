@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '../store';
-import { projectLabel, tagLabel } from '../utils/colors';
+import { projectLabel } from '../utils/colors';
 import { Icon } from './Icon';
 
 export function SearchBar({ onOpenHabit }: { onOpenHabit: (id: string) => void }) {
@@ -28,7 +28,7 @@ export function SearchBar({ onOpenHabit }: { onOpenHabit: (id: string) => void }
         const tagNames = h.tagIds
           .map((id) => db.tags.find((tag) => tag.id === id))
           .filter((tag) => !!tag)
-          .map((tag) => tagLabel(tag, t).toLowerCase());
+          .map((tag) => tag.name.toLowerCase());
         return (
           h.name.toLowerCase().includes(q) ||
           (h.notes ?? '').toLowerCase().includes(q) ||
@@ -102,7 +102,7 @@ export function SearchBar({ onOpenHabit }: { onOpenHabit: (id: string) => void }
                     <span className="s-meta">
                       {project ? projectLabel(project, t) : ''}
                       {tags.length > 0
-                        ? ` · ${tags.map((tag) => tagLabel(tag, t)).join(' / ')}`
+                        ? ` · ${tags.map((tag) => tag.name).join(' / ')}`
                         : ''}
                       {h.notes ? ` · ${h.notes}` : ''}
                     </span>
