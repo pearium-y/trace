@@ -7,7 +7,7 @@ import { Segmented } from '../components/Basics';
 import { HabitCard } from '../components/HabitCard';
 import { Icon } from '../components/Icon';
 import { TagSheet } from '../components/TagSheet';
-import { COLOR_KEYS, colorOf, EMOJIS, paletteLabel, projectLabel, tagLabel } from '../utils/colors';
+import { COLOR_KEYS, colorOf, EMOJIS, paletteLabel, projectLabel } from '../utils/colors';
 import { today } from '../utils/date';
 import styles from './HabitFormPage.module.css';
 
@@ -254,7 +254,7 @@ export default function HabitFormPage({
                   onClick={() => toggleTag(tag.id)}
                 >
                   <i className={styles.tagDot} style={{ background: def.accent }} />
-                  {tagLabel(tag, t)}
+                  {tag.name}
                 </button>
               );
             })}

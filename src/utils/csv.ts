@@ -1,6 +1,6 @@
 import type { DB, Lang, Project, Tag } from '../types';
 import { makeT } from '../i18n';
-import { projectLabel, tagLabel } from './colors';
+import { projectLabel } from './colors';
 
 /** 构建 Excel 友好（UTF-8 BOM）的 CSV 记录明细 */
 export function buildCSV(db: DB, lang: Lang = db.lang): string {
@@ -20,7 +20,7 @@ export function buildCSV(db: DB, lang: Lang = db.lang): string {
     ids
       .map((id) => db.tags.find((tag: Tag) => tag.id === id))
       .filter((tag): tag is Tag => !!tag)
-      .map((tag) => tagLabel(tag, t))
+      .map((tag) => tag.name)
       .join(' / ');
 
   for (const h of habits) {

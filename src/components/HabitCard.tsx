@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { Habit, RecordMap, Tag } from '../types';
 import { useStore } from '../store';
-import { colorOf, tagLabel } from '../utils/colors';
+import { colorOf } from '../utils/colors';
 import { fmtDuration } from '../utils/format';
 import { computeStreak, dayRatio, dayValue, isDayMet, weekValueSum } from '../utils/stats';
 import { ProgressBar, SealDone, StampSeal } from './Basics';
@@ -106,7 +106,7 @@ export function HabitCard({
               return (
                 <span key={tag.id} className="tagchip">
                   <i className="dot" style={{ background: tdef.accent }} />
-                  {tagLabel(tag, t)}
+                  {tag.name}
                 </span>
               );
             })}

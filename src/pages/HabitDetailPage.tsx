@@ -5,7 +5,7 @@ import { HeatLegend, YearHeatmap } from '../components/Heatmap';
 import { RecordSheet } from '../components/RecordSheet';
 import { SectionTitle } from '../components/Basics';
 import { Icon } from '../components/Icon';
-import { colorOf, projectLabel, tagLabel } from '../utils/colors';
+import { colorOf, projectLabel } from '../utils/colors';
 import { addDays, relativeDayLabel, today } from '../utils/date';
 import { fmtDuration, fmtPct } from '../utils/format';
 import { computeStreak, dayRatio, dayValue, goalText, habitRangeStat, heatLevel, valueLabel } from '../utils/stats';
@@ -96,7 +96,7 @@ export default function HabitDetailPage({
               return (
                 <span key={tag.id} className="tagchip">
                   <i className="dot" style={{ background: tdef.accent }} />
-                  {tagLabel(tag, t)}
+                  {tag.name}
                 </span>
               );
             })}

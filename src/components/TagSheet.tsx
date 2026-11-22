@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useStore } from '../store';
 import type { PaletteColor, Tag } from '../types';
-import { COLOR_KEYS, colorOf, paletteLabel, tagLabel } from '../utils/colors';
+import { COLOR_KEYS, colorOf, paletteLabel } from '../utils/colors';
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
 import styles from './TagSheet.module.css';
@@ -17,7 +17,7 @@ function TagForm({
   onDone: () => void;
 }) {
   const { db, t, addTag, updateTag } = useStore();
-  const [name, setName] = useState(tag && !tag.preset ? tag.name : '');
+  const [name, setName] = useState(tag?.name ?? '');
   const [color, setColor] = useState<PaletteColor>(tag?.color ?? 'seal');
   const [error, setError] = useState('');
 
@@ -31,14 +31,14 @@ function TagForm({
       (x) =>
         x.projectId === projectId &&
         x.id !== tag?.id &&
-        tagLabel(x, t).toLowerCase() === n.toLowerCase(),
+        x.name.toLowerCase() === n.toLowerCase(),
     );
     if (dup) {
       setError(t('tagExists'));
       return;
     }
     if (tag) {
-      updateTag(tag.id, tag.preset ? { color } : { name: n, color });
+      updateTag(tag.id, { name: n, color });
     } else {
       addTag(projectId, { name: n, color });
     }
@@ -56,14 +56,12 @@ function TagForm({
           className="input"
           maxLength={12}
           placeholder={t('tagNamePlaceholder')}
-          value={tag?.preset ? tagLabel(tag, t) : name}
-          disabled={!!tag?.preset}
+          value={name}
           onChange={(e) => {
             setName(e.target.value);
             setError('');
           }}
         />
-        {tag?.preset && <p className={styles.hint}>{t('builtinTagHint')}</p>}
         {error && <p className="field-error">{error}</p>}
       </div>
 
@@ -118,7 +116,7 @@ export function TagSheet({ projectId, onClose }: { projectId: string; onClose: (
               return (
                 <div key={tag.id} className={styles.row}>
                   <i className={styles.dot} style={{ background: def.accent }} />
-                  <span className={styles.name}>{tagLabel(tag, t)}</span>
+                  <span className={styles.name}>{tag.name}</span>
                   <button
                     type="button"
                     className={styles.rowBtn}
@@ -127,20 +125,18 @@ export function TagSheet({ projectId, onClose }: { projectId: string; onClose: (
                   >
                     <Icon name="edit" size={15} />
                   </button>
-                  {!tag.preset && (
-                    <button
-                      type="button"
-                      className={`${styles.rowBtn} ${styles.danger}`}
-                      onClick={() => {
-                        if (window.confirm(t('deleteTagConfirm', { name: tagLabel(tag, t) }))) {
-                          deleteTag(tag.id);
-                        }
-                      }}
-                      aria-label={t('deleteTag')}
-                    >
-                      <Icon name="trash" size={15} />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className={`${styles.rowBtn} ${styles.danger}`}
+                    onClick={() => {
+                      if (window.confirm(t('deleteTagConfirm', { name: tag.name }))) {
+                        deleteTag(tag.id);
+                      }
+                    }}
+                    aria-label={t('deleteTag')}
+                  >
+                    <Icon name="trash" size={15} />
+                  </button>
                 </div>
               );
             })}
