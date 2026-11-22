@@ -14,6 +14,8 @@ export const LEGACY_KEY = 'trace-data-v1';
 
 export const DEFAULT_PROJECT_ID = 'project-default';
 const COLORS: PaletteColor[] = ['seal', 'ochre', 'bamboo', 'indigo', 'wisteria', 'ink'];
+/** rc.1 自动生成的内置标签 ID 后缀（如 `project-default--tag-seal`） */
+const LEGACY_PRESET_TAG_ID_RE = /--tag-(seal|ochre|bamboo|indigo|wisteria|ink)$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null;
@@ -146,7 +148,19 @@ export function parseDB(x: unknown): DB | null {
   }
   const projectIds = new Set(projects.map((p) => p.id));
 
-  const tags = (x.tags as unknown[]).map(parseTag).filter((t): t is Tag => t !== null);
+  const rawTags = x.tags as unknown[];
+  const legacyTagIds = new Set<string>();
+  for (const raw of rawTags) {
+    if (!isObj(raw) || typeof raw.id !== 'string') continue;
+    const preset = raw.preset;
+    const isLegacyPreset =
+      (typeof preset === 'string' && COLORS.includes(preset as PaletteColor)) ||
+      LEGACY_PRESET_TAG_ID_RE.test(raw.id);
+    if (isLegacyPreset) legacyTagIds.add(raw.id);
+  }
+  const tags = rawTags
+    .map(parseTag)
+    .filter((t): t is Tag => t !== null && !legacyTagIds.has(t.id));
   for (const tag of tags) {
     if (!projectIds.has(tag.projectId)) tag.projectId = DEFAULT_PROJECT_ID;
   }
