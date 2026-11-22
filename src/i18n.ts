@@ -213,7 +213,7 @@ const zh: Dict = {
 
   migrationTitle: '检测到 V1.0 数据',
   migrationBody:
-    '本次更新为破坏性变更。你可以将旧数据迁移到新版本（所有标签归入默认标签，所有习惯归入默认项目），或退出网页。',
+    '本次更新为破坏性变更。你可以将旧数据迁移到新版本（所有习惯归入默认项目，不保留旧标签），或退出网页。',
   migrationMigrate: '迁移数据并进入',
   migrationExit: '退出网页',
   migrationFailed: '迁移失败：旧数据无法解析。',
@@ -221,7 +221,7 @@ const zh: Dict = {
   exitedBody: '旧数据未迁移，你可以安全关闭此标签页。',
   migrationEnTitle: 'V1.0 data detected',
   migrationEnBody:
-    'This is a breaking update. You can migrate old data (all labels become default tags, all habits go to the default project) or exit the page.',
+    'This is a breaking update. You can migrate old data (all habits go to the default project; old labels are not kept) or exit the page.',
   migrationEnMigrate: 'Migrate and continue',
   migrationEnExit: 'Exit',
 
@@ -472,7 +472,7 @@ const en: Dict = {
 
   migrationTitle: 'V1.0 data detected',
   migrationBody:
-    'This is a breaking update. You can migrate old data (all labels become default tags, all habits go to the default project) or exit the page.',
+    'This is a breaking update. You can migrate old data (all habits go to the default project; old labels are not kept) or exit the page.',
   migrationMigrate: 'Migrate and continue',
   migrationExit: 'Exit',
   migrationFailed: 'Migration failed: old data could not be parsed.',
@@ -480,7 +480,7 @@ const en: Dict = {
   exitedBody: 'Old data was not migrated. You can safely close this tab.',
   migrationEnTitle: 'V1.0 data detected',
   migrationEnBody:
-    'This is a breaking update. You can migrate old data (all labels become default tags, all habits go to the default project) or exit the page.',
+    'This is a breaking update. You can migrate old data (all habits go to the default project; old labels are not kept) or exit the page.',
   migrationEnMigrate: 'Migrate and continue',
   migrationEnExit: 'Exit',
 
