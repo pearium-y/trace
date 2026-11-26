@@ -5,7 +5,7 @@ import styles from './BottomNav.module.css';
 
 export type TabKey = 'today' | 'habits' | 'report' | 'notes' | 'settings';
 
-export const TAB_KEYS: TabKey[] = ['today', 'habits', 'report', 'notes', 'settings'];
+const TAB_KEYS: TabKey[] = ['today', 'habits', 'report', 'notes', 'settings'];
 
 const TAB_ICONS: Record<TabKey, IconName> = {
   today: 'today',

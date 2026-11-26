@@ -1,4 +1,4 @@
-import type { Frequency, GoalType, Habit, RecordMap } from '../types';
+import type { Frequency, GoalType, Habit, PaletteColor, RecordMap } from '../types';
 import { addDays, today } from './date';
 import { computeStreak, habitRangeStat } from './stats';
 
@@ -70,7 +70,7 @@ export function sortHabits(
 
 export interface TagOption {
   name: string;
-  color: import('../types').PaletteColor;
+  color: PaletteColor;
 }
 
 export function applyList(

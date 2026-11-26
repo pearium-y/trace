@@ -55,10 +55,6 @@ export function createDefaultDB(lang: Lang = detectLang()): DB {
   };
 }
 
-export function emptyDB(): DB {
-  return createDefaultDB();
-}
-
 function parseProject(x: unknown): Project | null {
   if (!isObj(x)) return null;
   const { id, name, emoji, color, createdAt, builtin } = x;

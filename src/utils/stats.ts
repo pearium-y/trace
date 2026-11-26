@@ -7,10 +7,6 @@ export function dayValue(records: RecordMap, habitId: string, date: string): num
   return records[habitId]?.[date]?.value ?? 0;
 }
 
-export function getRecord(records: RecordMap, habitId: string, date: string) {
-  return records[habitId]?.[date];
-}
-
 /** 某习惯某日的完成比值（周目标按 周目标/7 折算到日；无目标=有记录即 1） */
 export function dayRatio(habit: Habit, records: RecordMap, date: string): number {
   const v = dayValue(records, habit.id, date);
@@ -198,6 +194,3 @@ export function valueLabel(habit: Habit, v: number, t: T): string {
   return t('timesUnit', { n: v });
 }
 
-export function streakUnit(habit: Habit, t: T): string {
-  return habit.frequency === 'daily' ? t('unitDay') : t('unitWeek');
-}

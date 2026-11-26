@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import type { ReactNode } from 'react';
-import type { DB, Habit, Lang, PaletteColor, Project, StickyNote, Tag } from './types';
+import type { DB, Habit, Lang, Project, StickyNote, Tag } from './types';
 import { createDefaultDB, DEFAULT_PROJECT_ID, loadDB, saveDB } from './storage';
 import { today } from './utils/date';
 import { makeT } from './i18n';
@@ -258,5 +258,3 @@ export function useStore(): StoreValue {
   if (!ctx) throw new Error('useStore 必须在 StoreProvider 内使用');
   return ctx;
 }
-
-export type { PaletteColor };
