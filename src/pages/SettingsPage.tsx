@@ -4,6 +4,7 @@ import { useStore } from '../store';
 import { DB_KEY, buildExport, parseImport } from '../storage';
 import { SectionTitle, Segmented } from '../components/Basics';
 import { Icon } from '../components/Icon';
+import { BrandMark } from '../components/BrandMark';
 import { ProjectEditor } from '../components/ProjectSwitcher';
 import { colorOf, projectLabel } from '../utils/colors';
 import { today } from '../utils/date';
@@ -200,9 +201,7 @@ export default function SettingsPage() {
 
       <SectionTitle>{t('about')}</SectionTitle>
       <div className={`card ${styles.about}`}>
-        <span className="brand-seal" style={{ width: 36, height: 36, fontSize: 19 }}>
-          迹
-        </span>
+        <BrandMark size={36} className="brand-logo" />
         <div className={styles.aboutText}>
           <b>{t('appName')}</b> <span className="faint">V1.1-rc.2</span>
           <p>{t('aboutText')}</p>

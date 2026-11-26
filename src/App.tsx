@@ -6,6 +6,7 @@ import { StoreProvider, useStore } from './store';
 import { BottomNav, useTabs } from './components/BottomNav';
 import type { TabKey } from './components/BottomNav';
 import { Icon } from './components/Icon';
+import { BrandMark } from './components/BrandMark';
 import { MobileProjectBar, ProjectNav } from './components/ProjectSwitcher';
 import { SearchBar } from './components/SearchBar';
 import TodayPage from './pages/TodayPage';
@@ -86,7 +87,7 @@ function Shell() {
     <>
       <aside className="sidenav">
         <div className="brand">
-          <span className="brand-seal">迹</span>
+          <BrandMark size={42} className="brand-logo" />
           <div>
             <div className="brand-name">{t('appName')}</div>
             <div className="brand-sub">{t('brandSub')}</div>
@@ -130,7 +131,7 @@ function Gate({
   return (
     <div className="gate">
       <div className="gate-card card">
-        <span className="brand-seal gate-seal">迹</span>
+        <BrandMark size={42} className="brand-logo gate-seal" />
         <h1>{title}</h1>
         <p>{body}</p>
         <div className="gate-actions">{actions}</div>

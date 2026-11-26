@@ -148,19 +148,11 @@ input[type='number'] {
   margin-bottom: 26px;
 }
 
-.brand-seal {
-  width: 42px;
-  height: 42px;
+.brand-logo {
+  display: block;
   flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--seal);
-  color: #fdf6ec;
-  font-size: 23px;
-  border-radius: 10px 8px 11px 7px / 8px 11px 7px 10px;
   transform: rotate(-4deg);
-  box-shadow: 2px 3px 0 var(--seal-soft);
+  filter: drop-shadow(2px 3px 0 var(--seal-soft));
 }
 
 .brand-name {
