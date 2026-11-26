@@ -5,6 +5,7 @@ import { HeatLegend, YearHeatmap } from '../components/Heatmap';
 import { RecordSheet } from '../components/RecordSheet';
 import { NoteReminderSheet } from '../components/NoteReminderSheet';
 import { SectionTitle } from '../components/Basics';
+import { FolderChip, TagChips } from '../components/TagChips';
 import { Icon } from '../components/Icon';
 import { colorOf, projectLabel } from '../utils/colors';
 import { addDays, relativeDayLabel, today } from '../utils/date';
@@ -95,21 +96,8 @@ export default function HabitDetailPage({
         </p>
         {(project || tags.length > 0) && (
           <div className={styles.tagRow}>
-            {project && (
-              <span className="tagchip">
-                <Icon name="folder" size={11} />
-                {projectLabel(project, t)}
-              </span>
-            )}
-            {tags.map((tag) => {
-              const tdef = colorOf(tag.color);
-              return (
-                <span key={tag.id} className="tagchip">
-                  <i className="dot" style={{ background: tdef.accent }} />
-                  {tag.name}
-                </span>
-              );
-            })}
+            {project && <FolderChip>{projectLabel(project, t)}</FolderChip>}
+            <TagChips tags={tags} />
           </div>
         )}
         <YearHeatmap cellOf={cellOf} ramp={def.ramp} onSelect={(d) => setEditingDate(d)} lang={lang} />

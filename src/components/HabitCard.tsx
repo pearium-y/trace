@@ -5,6 +5,7 @@ import { colorOf } from '../utils/colors';
 import { fmtDuration } from '../utils/format';
 import { computeStreak, dayRatio, dayValue, isDayMet, weekValueSum } from '../utils/stats';
 import { ProgressBar, SealDone, StampSeal } from './Basics';
+import { FolderChip, TagChips } from './TagChips';
 import { Icon } from './Icon';
 import styles from './HabitCard.module.css';
 
@@ -95,21 +96,8 @@ export function HabitCard({
         </div>
         {(projectName || tags.length > 0) && (
           <div className={styles.tagRow}>
-            {projectName && (
-              <span className="tagchip">
-                <Icon name="folder" size={11} />
-                {projectName}
-              </span>
-            )}
-            {tags.map((tag) => {
-              const tdef = colorOf(tag.color);
-              return (
-                <span key={tag.id} className="tagchip">
-                  <i className="dot" style={{ background: tdef.accent }} />
-                  {tag.name}
-                </span>
-              );
-            })}
+            {projectName && <FolderChip>{projectName}</FolderChip>}
+            <TagChips tags={tags} />
           </div>
         )}
       </button>

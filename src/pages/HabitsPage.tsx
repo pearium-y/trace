@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useStore } from '../store';
 import { Icon } from '../components/Icon';
+import { FolderChip, TagChips } from '../components/TagChips';
 import { ListControls } from '../components/ListControls';
 import { colorOf, projectLabel } from '../utils/colors';
 import { addDays, today } from '../utils/date';
@@ -101,20 +102,9 @@ export default function HabitsPage({
                     {(tags.length > 0 || !activeProjectId) && (
                       <span className={styles.tagRow}>
                         {!activeProjectId && project && (
-                          <span className="tagchip">
-                            <Icon name="folder" size={11} />
-                            {projectLabel(project, t)}
-                          </span>
+                          <FolderChip>{projectLabel(project, t)}</FolderChip>
                         )}
-                        {tags.map((tag) => {
-                          const tdef = colorOf(tag.color);
-                          return (
-                            <span key={tag.id} className="tagchip">
-                              <i className="dot" style={{ background: tdef.accent }} />
-                              {tag.name}
-                            </span>
-                          );
-                        })}
+                        <TagChips tags={tags} />
                       </span>
                     )}
                   </span>

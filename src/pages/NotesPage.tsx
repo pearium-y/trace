@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useStore } from '../store';
+import { ColorPicker } from '../components/ColorPicker';
 import { Icon } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
 import { Switch } from '../components/Basics';
+import { HabitChip } from '../components/TagChips';
 import { colorOf } from '../utils/colors';
 import { fullDateLabel } from '../utils/date';
 import { habitOf } from '../utils/entities';
@@ -87,12 +89,7 @@ export default function NotesPage() {
                 {pending && <span className={styles.dot} aria-label={t('noteReminderTag')} />}
                 <span className={styles.text}>{note.text}</span>
                 <span className={styles.foot}>
-                  {habit && (
-                    <span className="tagchip">
-                      <Icon name="folder" size={11} />
-                      {habit.emoji} {habit.name}
-                    </span>
-                  )}
+                  {habit && <HabitChip habit={habit} />}
                   {note.remind && (
                     <span className={`${styles.bell} ${pending ? styles.bellOn : ''}`}>
                       <Icon name="bell" size={12} />
@@ -111,12 +108,7 @@ export default function NotesPage() {
           <div className={styles.detail}>
             <p className={styles.detailText}>{viewing.text}</p>
             <div className={styles.detailMeta}>
-              {viewingHabit && (
-                <span className="tagchip">
-                  <Icon name="folder" size={11} />
-                  {viewingHabit.emoji} {viewingHabit.name}
-                </span>
-              )}
+              {viewingHabit && <HabitChip habit={viewingHabit} />}
               {viewing.remind && (
                 <span className="tagchip">
                   <Icon name="bell" size={11} />
@@ -211,22 +203,7 @@ function NoteEditor({ note, onClose }: { note?: StickyNote; onClose: () => void 
 
       <div className="field">
         <span className="field-label">{t('noteColor')}</span>
-        <div className="color-row">
-          {NOTE_COLORS.map((c) => {
-            const def = colorOf(c);
-            return (
-              <button
-                key={c}
-                type="button"
-                className={`color-dot ${c === color ? 'on' : ''}`}
-                style={{ background: def.accent }}
-                aria-label={t(`palette_${c}`)}
-                title={t(`palette_${c}`)}
-                onClick={() => setColor(c)}
-              />
-            );
-          })}
-        </div>
+        <ColorPicker value={color} onChange={setColor} colors={NOTE_COLORS} />
       </div>
 
       <div className={`field ${styles.switchField}`}>

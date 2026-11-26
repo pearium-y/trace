@@ -33,27 +33,6 @@
   transform: rotate(-4deg);
 }
 
-.colorRow {
-  display: flex;
-  gap: 13px;
-  flex-wrap: wrap;
-  padding: 3px 0;
-}
-
-.colorDot {
-  width: 33px;
-  height: 33px;
-  border-radius: 50%;
-  border: 2.5px solid var(--paper-card);
-  box-shadow: 0 0 0 1.5px var(--line);
-  transition: transform 0.13s ease, box-shadow 0.13s ease;
-}
-
-.colorOn {
-  transform: scale(1.12) rotate(-6deg);
-  box-shadow: 0 0 0 2.5px var(--ink);
-}
-
 .targetRow {
   display: flex;
   align-items: center;
