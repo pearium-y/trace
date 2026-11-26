@@ -6,7 +6,7 @@ import { SectionTitle, Segmented, Switch } from '../components/Basics';
 import { Icon } from '../components/Icon';
 import { BrandMark } from '../components/BrandMark';
 import { Sheet } from '../components/Sheet';
-import { ProjectEditor } from '../components/ProjectSwitcher';
+import { ProjectEditor } from '../components/ProjectEditor';
 import { colorOf, projectLabel } from '../utils/colors';
 import { today } from '../utils/date';
 import { countProjectHabits } from '../utils/entities';
