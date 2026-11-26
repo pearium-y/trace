@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useStore } from '../store';
 import { HeatLegend, YearHeatmap } from '../components/Heatmap';
 import { RecordSheet } from '../components/RecordSheet';
+import { NoteReminderSheet } from '../components/NoteReminderSheet';
 import { SectionTitle } from '../components/Basics';
 import { Icon } from '../components/Icon';
 import { colorOf, projectLabel } from '../utils/colors';
 import { addDays, relativeDayLabel, today } from '../utils/date';
 import { fmtDuration, fmtPct } from '../utils/format';
+import { pendingNotesForHabit } from '../utils/notes';
 import { computeStreak, dayRatio, dayValue, goalText, habitRangeStat, heatLevel, valueLabel } from '../utils/stats';
+import type { StickyNote } from '../types';
 import styles from './HabitDetailPage.module.css';
 
 export default function HabitDetailPage({
@@ -22,6 +25,14 @@ export default function HabitDetailPage({
 }) {
   const { db, t, lang, setRecord, removeRecord } = useStore();
   const [editingDate, setEditingDate] = useState<string | null>(null);
+  const [reminderQueue, setReminderQueue] = useState<StickyNote[] | null>(null);
+
+  useEffect(() => {
+    const pending = pendingNotesForHabit(db.notes, habitId);
+    if (pending.length > 0) setReminderQueue(pending);
+    // 仅在打开习惯详情时触发一次
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [habitId]);
 
   const habit = db.habits.find((h) => h.id === habitId);
 
@@ -177,6 +188,10 @@ export default function HabitDetailPage({
             setEditingDate(null);
           }}
         />
+      )}
+
+      {reminderQueue && reminderQueue.length > 0 && (
+        <NoteReminderSheet notes={reminderQueue} onFinish={() => setReminderQueue(null)} />
       )}
     </div>
   );

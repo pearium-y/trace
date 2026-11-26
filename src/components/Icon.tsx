@@ -23,7 +23,9 @@ export type IconName =
   | 'folder'
   | 'globe'
   | 'tag'
-  | 'note';
+  | 'note'
+  | 'sticky'
+  | 'bell';
 
 /** 手绘笔触风格图标 */
 const ICONS: Record<IconName, ReactNode> = {
@@ -101,6 +103,19 @@ const ICONS: Record<IconName, ReactNode> = {
     <>
       <path d="M5 4.5h14v15H5z" />
       <path d="M8.5 9h7M8.5 12.5h7M8.5 16h4.5" />
+    </>
+  ),
+  sticky: (
+    <>
+      <path d="M5 4.5h14v10.5l-4.5 4.5H5z" />
+      <path d="M19 15h-4.5v4.5" />
+      <path d="M8.5 9h7M8.5 12h4.5" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M6 16.5h12c-1.2-1.3-1.9-3.1-1.9-5.2V10a4.1 4.1 0 0 0-8.2 0v1.3c0 2.1-.7 3.9-1.9 5.2z" />
+      <path d="M10.2 19a2 2 0 0 0 3.6 0" />
     </>
   ),
 };

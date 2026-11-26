@@ -46,6 +46,21 @@ export interface DayRecord {
   updatedAt: number;
 }
 
+/** 便签墙上的便签 */
+export interface StickyNote {
+  id: string;
+  text: string;
+  color: PaletteColor;
+  createdAt: string;
+  updatedAt: number;
+  /** 是否每天提醒 */
+  remind: boolean;
+  /** 关联的习惯 */
+  habitId?: string;
+  /** 最近一次查看提醒的日期（YYYY-MM-DD），用于每日小红点 */
+  lastViewedDate?: string;
+}
+
 /** habitId -> date(YYYY-MM-DD) -> record */
 export type RecordMap = Record<string, Record<string, DayRecord>>;
 
@@ -55,6 +70,9 @@ export interface DB {
   tags: Tag[];
   habits: Habit[];
   records: RecordMap;
+  /** 便签墙功能开关 */
+  notesEnabled: boolean;
+  notes: StickyNote[];
   /** null = 全部项目汇总 */
   activeProjectId: string | null;
   lang: Lang;
@@ -68,5 +86,7 @@ export interface ExportPayload {
   tags: Tag[];
   habits: Habit[];
   records: RecordMap;
+  notesEnabled?: boolean;
+  notes?: StickyNote[];
   lang: Lang;
 }

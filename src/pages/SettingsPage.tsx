@@ -2,21 +2,25 @@ import { useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useStore } from '../store';
 import { DB_KEY, buildExport, parseImport } from '../storage';
-import { SectionTitle, Segmented } from '../components/Basics';
+import { SectionTitle, Segmented, Switch } from '../components/Basics';
 import { Icon } from '../components/Icon';
+import { BrandMark } from '../components/BrandMark';
+import { Sheet } from '../components/Sheet';
 import { ProjectEditor } from '../components/ProjectSwitcher';
 import { colorOf, projectLabel } from '../utils/colors';
 import { today } from '../utils/date';
 import { buildCSV } from '../utils/csv';
 import { downloadFile } from '../utils/download';
+import { APP_VERSION, RELEASE_NOTES } from '../version';
 import type { Project } from '../types';
 import styles from './SettingsPage.module.css';
 
 export default function SettingsPage() {
-  const { db, lang, t, importDB, clearAll, setLang } = useStore();
+  const { db, lang, t, importDB, clearAll, setLang, setNotesEnabled } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState('');
   const [editor, setEditor] = useState<Project | 'new' | null>(null);
+  const [releaseOpen, setReleaseOpen] = useState(false);
 
   const recordCount = useMemo(
     () => Object.values(db.records).reduce((s, days) => s + Object.keys(days).length, 0),
@@ -98,6 +102,22 @@ export default function SettingsPage() {
             { value: 'en', label: t('langEn') },
           ]}
         />
+      </div>
+
+      <SectionTitle>{t('notesWall')}</SectionTitle>
+      <div className={`card ${styles.group}`}>
+        <div className={styles.item}>
+          <Icon name="sticky" size={18} />
+          <span className={styles.itemMain}>
+            <b>{t('notesWall')}</b>
+            <i>{t('notesWallHint')}</i>
+          </span>
+          <Switch
+            checked={db.notesEnabled}
+            onChange={setNotesEnabled}
+            label={t('notesWall')}
+          />
+        </div>
       </div>
 
       <SectionTitle>{t('manageProjects')}</SectionTitle>
@@ -199,21 +219,43 @@ export default function SettingsPage() {
       </div>
 
       <SectionTitle>{t('about')}</SectionTitle>
-      <div className={`card ${styles.about}`}>
-        <span className="brand-seal" style={{ width: 36, height: 36, fontSize: 19 }}>
-          迹
-        </span>
+      <button
+        type="button"
+        className={`card ${styles.about} ${styles.aboutBtn}`}
+        onClick={() => setReleaseOpen(true)}
+      >
+        <BrandMark size={36} className="brand-logo" />
         <div className={styles.aboutText}>
-          <b>{t('appName')} Trace</b> <span className="faint">V1.1-rc.2</span>
+          <b>{t('appName')}</b> <span className="faint">V{APP_VERSION}</span>
           <p>{t('aboutText')}</p>
+          <span className={styles.aboutMore}>
+            {t('aboutHint')}
+            <Icon name="chevron-right" size={13} />
+          </span>
         </div>
-      </div>
+      </button>
 
       {editor && (
         <ProjectEditor
           project={editor === 'new' ? undefined : editor}
           onClose={() => setEditor(null)}
         />
+      )}
+
+      {releaseOpen && (
+        <Sheet title={t('releaseNotesTitle')} onClose={() => setReleaseOpen(false)}>
+          <div className={styles.release}>
+            <div className={styles.releaseHead}>
+              <b>V{APP_VERSION}</b>
+              <span>{t('versionLabel')}</span>
+            </div>
+            <ul>
+              {RELEASE_NOTES[lang].map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        </Sheet>
       )}
     </div>
   );

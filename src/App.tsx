@@ -6,14 +6,17 @@ import { StoreProvider, useStore } from './store';
 import { BottomNav, useTabs } from './components/BottomNav';
 import type { TabKey } from './components/BottomNav';
 import { Icon } from './components/Icon';
+import { BrandMark } from './components/BrandMark';
 import { MobileProjectBar, ProjectNav } from './components/ProjectSwitcher';
 import { SearchBar } from './components/SearchBar';
+import { pendingNotes } from './utils/notes';
 import TodayPage from './pages/TodayPage';
 import HabitsPage from './pages/HabitsPage';
 import HabitDetailPage from './pages/HabitDetailPage';
 import HabitFormPage from './pages/HabitFormPage';
 import ReportPage from './pages/ReportPage';
 import SettingsPage from './pages/SettingsPage';
+import NotesPage from './pages/NotesPage';
 
 type View = { tab: TabKey } | { page: 'habit'; id: string } | { page: 'habit-form'; id?: string };
 
@@ -21,6 +24,7 @@ function Shell() {
   const { db, lang, t, setActiveProject } = useStore();
   const tabs = useTabs();
   const [view, setView] = useState<View>({ tab: 'today' });
+  const pendingNoteCount = pendingNotes(db.notes).length;
 
   useEffect(() => {
     document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
@@ -35,6 +39,10 @@ function Shell() {
     document.addEventListener('focusin', onFocus);
     return () => document.removeEventListener('focusin', onFocus);
   }, []);
+
+  useEffect(() => {
+    if (!db.notesEnabled && 'tab' in view && view.tab === 'notes') setView({ tab: 'today' });
+  }, [db.notesEnabled, view]);
 
   const openHabit = (id: string) => setView({ page: 'habit', id });
   const backFromHabit = () => {
@@ -58,6 +66,8 @@ function Shell() {
       content = <HabitsPage onOpen={openHabit} onCreate={() => setView({ page: 'habit-form' })} />;
     } else if (view.tab === 'report') {
       content = <ReportPage />;
+    } else if (view.tab === 'notes') {
+      content = <NotesPage />;
     } else {
       content = <SettingsPage />;
     }
@@ -86,7 +96,7 @@ function Shell() {
     <>
       <aside className="sidenav">
         <div className="brand">
-          <span className="brand-seal">迹</span>
+          <BrandMark size={42} className="brand-logo" />
           <div>
             <div className="brand-name">{t('appName')}</div>
             <div className="brand-sub">{t('brandSub')}</div>
@@ -101,6 +111,9 @@ function Shell() {
           >
             <Icon name={tab.icon} size={20} />
             {tab.label}
+            {tab.key === 'notes' && pendingNoteCount > 0 && (
+              <span className="nav-badge">{pendingNoteCount}</span>
+            )}
           </button>
         ))}
       </aside>
@@ -113,7 +126,13 @@ function Shell() {
           {content}
         </main>
       </div>
-      {hasNav && <BottomNav active={activeTab} onSelect={(tab) => setView({ tab })} />}
+      {hasNav && (
+        <BottomNav
+          active={activeTab}
+          onSelect={(tab) => setView({ tab })}
+          notesBadge={pendingNoteCount}
+        />
+      )}
     </>
   );
 }
@@ -130,7 +149,7 @@ function Gate({
   return (
     <div className="gate">
       <div className="gate-card card">
-        <span className="brand-seal gate-seal">迹</span>
+        <BrandMark size={42} className="brand-logo gate-seal" />
         <h1>{title}</h1>
         <p>{body}</p>
         <div className="gate-actions">{actions}</div>

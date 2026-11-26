@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import type { ReactNode } from 'react';
-import type { DB, Habit, Lang, PaletteColor, Project, Tag } from './types';
+import type { DB, Habit, Lang, PaletteColor, Project, StickyNote, Tag } from './types';
 import { createDefaultDB, DEFAULT_PROJECT_ID, loadDB, saveDB } from './storage';
 import { today } from './utils/date';
 import { makeT } from './i18n';
@@ -14,6 +14,7 @@ export function uid(): string {
 export type HabitInput = Omit<Habit, 'id' | 'createdAt'>;
 export type ProjectInput = Pick<Project, 'name' | 'emoji' | 'color'>;
 export type TagInput = Pick<Tag, 'name' | 'color'>;
+export type NoteInput = Pick<StickyNote, 'text' | 'color' | 'remind' | 'habitId'>;
 
 type Action =
   | { type: 'addProject'; project: Project }
@@ -27,6 +28,11 @@ type Action =
   | { type: 'deleteHabit'; id: string }
   | { type: 'setRecord'; habitId: string; date: string; value: number; note?: string }
   | { type: 'removeRecord'; habitId: string; date: string }
+  | { type: 'setNotesEnabled'; enabled: boolean }
+  | { type: 'addNote'; note: StickyNote }
+  | { type: 'updateNote'; id: string; patch: Partial<NoteInput> }
+  | { type: 'deleteNote'; id: string }
+  | { type: 'viewNote'; id: string; date: string }
   | { type: 'setActiveProject'; id: string | null }
   | { type: 'setLang'; lang: Lang }
   | { type: 'importDB'; db: DB }
@@ -60,6 +66,9 @@ function reducer(db: DB, action: Action): DB {
         tags: db.tags.filter((t) => t.projectId !== action.id),
         habits: db.habits.filter((h) => h.projectId !== action.id),
         records,
+        notes: db.notes.map((n) =>
+          n.habitId && habitIds.has(n.habitId) ? { ...n, habitId: undefined } : n,
+        ),
         activeProjectId: db.activeProjectId === action.id ? fallback : db.activeProjectId,
       };
     }
@@ -95,7 +104,12 @@ function reducer(db: DB, action: Action): DB {
     case 'deleteHabit': {
       const records = { ...db.records };
       delete records[action.id];
-      return { ...db, habits: db.habits.filter((h) => h.id !== action.id), records };
+      return {
+        ...db,
+        habits: db.habits.filter((h) => h.id !== action.id),
+        records,
+        notes: db.notes.map((n) => (n.habitId === action.id ? { ...n, habitId: undefined } : n)),
+      };
     }
     case 'setRecord': {
       const days = { ...(db.records[action.habitId] ?? {}) };
@@ -111,6 +125,24 @@ function reducer(db: DB, action: Action): DB {
       delete days[action.date];
       return { ...db, records: { ...db.records, [action.habitId]: days } };
     }
+    case 'setNotesEnabled':
+      return { ...db, notesEnabled: action.enabled };
+    case 'addNote':
+      return { ...db, notes: [...db.notes, action.note] };
+    case 'updateNote':
+      return {
+        ...db,
+        notes: db.notes.map((n) =>
+          n.id === action.id ? { ...n, ...action.patch, updatedAt: Date.now() } : n,
+        ),
+      };
+    case 'deleteNote':
+      return { ...db, notes: db.notes.filter((n) => n.id !== action.id) };
+    case 'viewNote':
+      return {
+        ...db,
+        notes: db.notes.map((n) => (n.id === action.id ? { ...n, lastViewedDate: action.date } : n)),
+      };
     case 'setActiveProject':
       return { ...db, activeProjectId: action.id };
     case 'setLang':
@@ -141,6 +173,11 @@ export interface StoreValue {
   deleteHabit: (id: string) => void;
   setRecord: (habitId: string, date: string, value: number, note?: string) => void;
   removeRecord: (habitId: string, date: string) => void;
+  setNotesEnabled: (enabled: boolean) => void;
+  addNote: (input: NoteInput) => StickyNote;
+  updateNote: (id: string, patch: Partial<NoteInput>) => void;
+  deleteNote: (id: string) => void;
+  markNoteViewed: (id: string) => void;
   importDB: (db: DB) => void;
   clearAll: () => void;
 }
@@ -194,6 +231,20 @@ export function StoreProvider({
       setRecord: (habitId, date, value, note) =>
         dispatch({ type: 'setRecord', habitId, date, value, note }),
       removeRecord: (habitId, date) => dispatch({ type: 'removeRecord', habitId, date }),
+      setNotesEnabled: (enabled) => dispatch({ type: 'setNotesEnabled', enabled }),
+      addNote: (input) => {
+        const note: StickyNote = {
+          ...input,
+          id: uid(),
+          createdAt: today(),
+          updatedAt: Date.now(),
+        };
+        dispatch({ type: 'addNote', note });
+        return note;
+      },
+      updateNote: (id, patch) => dispatch({ type: 'updateNote', id, patch }),
+      deleteNote: (id) => dispatch({ type: 'deleteNote', id }),
+      markNoteViewed: (id) => dispatch({ type: 'viewNote', id, date: today() }),
       importDB: (next) => dispatch({ type: 'importDB', db: next }),
       clearAll: () => dispatch({ type: 'clearAll' }),
     };

@@ -148,19 +148,11 @@ input[type='number'] {
   margin-bottom: 26px;
 }
 
-.brand-seal {
-  width: 42px;
-  height: 42px;
+.brand-logo {
+  display: block;
   flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--seal);
-  color: #fdf6ec;
-  font-size: 23px;
-  border-radius: 10px 8px 11px 7px / 8px 11px 7px 10px;
   transform: rotate(-4deg);
-  box-shadow: 2px 3px 0 var(--seal-soft);
+  filter: drop-shadow(2px 3px 0 var(--seal-soft));
 }
 
 .brand-name {
@@ -951,6 +943,62 @@ input[type='number'] {
 .stagger > *:nth-child(8) { animation-delay: 0.3s; }
 .stagger > *:nth-child(9) { animation-delay: 0.34s; }
 .stagger > *:nth-child(10) { animation-delay: 0.38s; }
+
+/* ===== 开关 ===== */
+.switch {
+  position: relative;
+  width: 44px;
+  height: 25px;
+  flex: none;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--paper-deep);
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.switch.on {
+  background: var(--seal);
+  border-color: var(--seal-deep);
+}
+
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+.switch.on .switch-knob {
+  transform: translateX(19px);
+  background: #fdf6ec;
+  border-color: transparent;
+}
+
+/* ===== 导航红点 ===== */
+.nav-badge {
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--seal);
+  color: #fdf6ec;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.sidenav-item .nav-badge {
+  margin-left: auto;
+}
 
 /* ===== 通用 ===== */
 .muted {
