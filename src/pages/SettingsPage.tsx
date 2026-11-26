@@ -204,7 +204,7 @@ export default function SettingsPage() {
           迹
         </span>
         <div className={styles.aboutText}>
-          <b>{t('appName')} Trace</b> <span className="faint">V1.1-rc.2</span>
+          <b>{t('appName')}</b> <span className="faint">V1.1-rc.2</span>
           <p>{t('aboutText')}</p>
         </div>
       </div>

@@ -260,7 +260,7 @@ const zh: Dict = {
 
 const en: Dict = {
   appName: 'Trace',
-  brandSub: 'TRACE',
+  brandSub: 'HABIT LOG',
 
   tabToday: 'Today',
   tabHabits: 'Habits',
