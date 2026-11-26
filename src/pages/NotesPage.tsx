@@ -13,7 +13,7 @@ import styles from './NotesPage.module.css';
 const NOTE_COLORS: PaletteColor[] = ['seal', 'ochre', 'bamboo', 'indigo', 'wisteria'];
 
 export default function NotesPage() {
-  const { db, t, deleteNote } = useStore();
+  const { db, t, deleteNote, markNoteViewed } = useStore();
   const [editing, setEditing] = useState<StickyNote | 'new' | null>(null);
   const [viewing, setViewing] = useState<StickyNote | null>(null);
 
@@ -80,7 +80,10 @@ export default function NotesPage() {
                     borderColor: `${def.accent}4d`,
                   } as CSSProperties
                 }
-                onClick={() => setViewing(note)}
+                onClick={() => {
+                  if (note.remind) markNoteViewed(note.id);
+                  setViewing(note);
+                }}
               >
                 {pending && <span className={styles.dot} aria-label={t('noteReminderTag')} />}
                 <span className={styles.text}>{note.text}</span>

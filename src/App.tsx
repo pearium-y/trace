@@ -9,6 +9,7 @@ import { Icon } from './components/Icon';
 import { BrandMark } from './components/BrandMark';
 import { MobileProjectBar, ProjectNav } from './components/ProjectSwitcher';
 import { SearchBar } from './components/SearchBar';
+import { pendingNotes } from './utils/notes';
 import TodayPage from './pages/TodayPage';
 import HabitsPage from './pages/HabitsPage';
 import HabitDetailPage from './pages/HabitDetailPage';
@@ -23,6 +24,7 @@ function Shell() {
   const { db, lang, t, setActiveProject } = useStore();
   const tabs = useTabs();
   const [view, setView] = useState<View>({ tab: 'today' });
+  const pendingNoteCount = pendingNotes(db.notes).length;
 
   useEffect(() => {
     document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
@@ -109,6 +111,9 @@ function Shell() {
           >
             <Icon name={tab.icon} size={20} />
             {tab.label}
+            {tab.key === 'notes' && pendingNoteCount > 0 && (
+              <span className="nav-badge">{pendingNoteCount}</span>
+            )}
           </button>
         ))}
       </aside>
@@ -121,7 +126,13 @@ function Shell() {
           {content}
         </main>
       </div>
-      {hasNav && <BottomNav active={activeTab} onSelect={(tab) => setView({ tab })} />}
+      {hasNav && (
+        <BottomNav
+          active={activeTab}
+          onSelect={(tab) => setView({ tab })}
+          notesBadge={pendingNoteCount}
+        />
+      )}
     </>
   );
 }

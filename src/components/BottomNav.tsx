@@ -35,9 +35,11 @@ export function useTabs() {
 export function BottomNav({
   active,
   onSelect,
+  notesBadge = 0,
 }: {
   active: TabKey;
-  onSelect: (t: TabKey) => void;
+  onSelect: (tab: TabKey) => void;
+  notesBadge?: number;
 }) {
   const tabs = useTabs();
   return (
@@ -48,7 +50,12 @@ export function BottomNav({
           className={`${styles.item} ${active === tab.key ? styles.active : ''}`}
           onClick={() => onSelect(tab.key)}
         >
-          <Icon name={tab.icon} size={22} />
+          <span className={styles.iconWrap}>
+            <Icon name={tab.icon} size={22} />
+            {tab.key === 'notes' && notesBadge > 0 && (
+              <span className={`nav-badge ${styles.badge}`}>{notesBadge}</span>
+            )}
+          </span>
           <span>{tab.label}</span>
         </button>
       ))}
