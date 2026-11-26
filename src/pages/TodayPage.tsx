@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { HabitCard } from '../components/HabitCard';
 import { RecordSheet } from '../components/RecordSheet';
+import { NoteReminderSheet } from '../components/NoteReminderSheet';
 import { ListControls } from '../components/ListControls';
 import { Icon } from '../components/Icon';
 import { dateLabel, fullDateLabel, today, weekdayLabel } from '../utils/date';
 import { computeStreak, dayValue, overallDayRatio } from '../utils/stats';
 import { projectLabel } from '../utils/colors';
 import { applyList, emptyFilter } from '../utils/list';
+import { pendingNotesForHabit } from '../utils/notes';
 import type { ListFilter, SortKey, TagOption } from '../utils/list';
-import type { Habit } from '../types';
+import type { Habit, StickyNote } from '../types';
 import styles from './TodayPage.module.css';
 
 export default function TodayPage({ onCreate }: { onCreate: () => void }) {
@@ -19,6 +21,8 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
   const [stamp, setStamp] = useState<{ habitId: string; date: string; key: number } | null>(null);
   const [sort, setSort] = useState<SortKey>('default');
   const [filter, setFilter] = useState<ListFilter>(emptyFilter());
+  const [reminderQueue, setReminderQueue] = useState<StickyNote[] | null>(null);
+  const pendingActionRef = useRef<(() => void) | null>(null);
 
   const t0 = today();
   const isBackfill = selDate < t0;
@@ -94,10 +98,27 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
     setEditing(null);
   };
 
-  const quickAdd = (h: Habit) => {
+  function recordQuickAdd(h: Habit) {
     const cur = dayValue(db.records, h.id, selDate);
     setRecord(h.id, selDate, cur + 1);
     doStamp(h.id, selDate);
+  }
+
+  const quickAdd = (h: Habit) => {
+    const pending = pendingNotesForHabit(db.notes, h.id);
+    if (pending.length > 0) {
+      pendingActionRef.current = () => recordQuickAdd(h);
+      setReminderQueue(pending);
+      return;
+    }
+    recordQuickAdd(h);
+  };
+
+  const finishReminders = () => {
+    setReminderQueue(null);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    action?.();
   };
 
   return (
@@ -225,6 +246,10 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
           onSave={handleSave}
           onRemove={handleRemove}
         />
+      )}
+
+      {reminderQueue && reminderQueue.length > 0 && (
+        <NoteReminderSheet notes={reminderQueue} onFinish={finishReminders} />
       )}
     </div>
   );
