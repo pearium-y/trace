@@ -6,6 +6,7 @@ import type {
   Lang,
   PaletteColor,
   Project,
+  StickyNote,
   Tag,
 } from './types';
 
@@ -47,6 +48,8 @@ export function createDefaultDB(lang: Lang = detectLang()): DB {
     tags: [],
     habits: [],
     records: {},
+    notesEnabled: false,
+    notes: [],
     activeProjectId: project.id,
     lang,
   };
@@ -115,6 +118,26 @@ function parseHabit(x: unknown): Habit | null {
   };
 }
 
+function parseNote(x: unknown): StickyNote | null {
+  if (!isObj(x)) return null;
+  const { id, text, color, createdAt, updatedAt, remind, habitId, lastViewedDate } = x;
+  if (typeof id !== 'string' || !id) return null;
+  if (typeof text !== 'string' || !text.trim()) return null;
+  if (typeof color !== 'string' || !COLORS.includes(color as PaletteColor)) return null;
+  if (typeof createdAt !== 'string' || !DATE_RE.test(createdAt)) return null;
+  return {
+    id,
+    text,
+    color: color as PaletteColor,
+    createdAt,
+    updatedAt: typeof updatedAt === 'number' && Number.isFinite(updatedAt) ? updatedAt : Date.now(),
+    remind: remind === true,
+    habitId: typeof habitId === 'string' && habitId ? habitId : undefined,
+    lastViewedDate:
+      typeof lastViewedDate === 'string' && DATE_RE.test(lastViewedDate) ? lastViewedDate : undefined,
+  };
+}
+
 function parseRecords(x: unknown): DB['records'] {
   const out: DB['records'] = {};
   if (!isObj(x)) return out;
@@ -178,13 +201,31 @@ export function parseDB(x: unknown): DB | null {
     if (!habitIds.has(k)) delete records[k];
   }
 
+  const notes = Array.isArray(x.notes)
+    ? (x.notes as unknown[]).map(parseNote).filter((n): n is StickyNote => n !== null)
+    : [];
+  for (const note of notes) {
+    if (note.habitId && !habitIds.has(note.habitId)) delete note.habitId;
+  }
+  const notesEnabled = x.notesEnabled === true;
+
   const activeProjectId =
     typeof x.activeProjectId === 'string' && projectIds.has(x.activeProjectId)
       ? x.activeProjectId
       : null;
   const lang: Lang = x.lang === 'en' ? 'en' : 'zh';
 
-  return { version: 2, projects, tags, habits, records, activeProjectId, lang };
+  return {
+    version: 2,
+    projects,
+    tags,
+    habits,
+    records,
+    notesEnabled,
+    notes,
+    activeProjectId,
+    lang,
+  };
 }
 
 export function loadDB(): DB {
@@ -287,6 +328,8 @@ function migrateLegacyPayload(x: unknown): DB | null {
     tags: [],
     habits,
     records,
+    notesEnabled: false,
+    notes: [],
     activeProjectId: project.id,
     lang: 'zh',
   };
@@ -301,6 +344,8 @@ export function buildExport(db: DB): ExportPayload {
     tags: db.tags,
     habits: db.habits,
     records: db.records,
+    notesEnabled: db.notesEnabled,
+    notes: db.notes,
     lang: db.lang,
   };
 }

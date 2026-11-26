@@ -15,6 +15,7 @@ import HabitDetailPage from './pages/HabitDetailPage';
 import HabitFormPage from './pages/HabitFormPage';
 import ReportPage from './pages/ReportPage';
 import SettingsPage from './pages/SettingsPage';
+import NotesPage from './pages/NotesPage';
 
 type View = { tab: TabKey } | { page: 'habit'; id: string } | { page: 'habit-form'; id?: string };
 
@@ -36,6 +37,10 @@ function Shell() {
     document.addEventListener('focusin', onFocus);
     return () => document.removeEventListener('focusin', onFocus);
   }, []);
+
+  useEffect(() => {
+    if (!db.notesEnabled && 'tab' in view && view.tab === 'notes') setView({ tab: 'today' });
+  }, [db.notesEnabled, view]);
 
   const openHabit = (id: string) => setView({ page: 'habit', id });
   const backFromHabit = () => {
@@ -59,6 +64,8 @@ function Shell() {
       content = <HabitsPage onOpen={openHabit} onCreate={() => setView({ page: 'habit-form' })} />;
     } else if (view.tab === 'report') {
       content = <ReportPage />;
+    } else if (view.tab === 'notes') {
+      content = <NotesPage />;
     } else {
       content = <SettingsPage />;
     }

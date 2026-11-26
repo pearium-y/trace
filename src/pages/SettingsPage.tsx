@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useStore } from '../store';
 import { DB_KEY, buildExport, parseImport } from '../storage';
-import { SectionTitle, Segmented } from '../components/Basics';
+import { SectionTitle, Segmented, Switch } from '../components/Basics';
 import { Icon } from '../components/Icon';
 import { BrandMark } from '../components/BrandMark';
 import { Sheet } from '../components/Sheet';
@@ -16,7 +16,7 @@ import type { Project } from '../types';
 import styles from './SettingsPage.module.css';
 
 export default function SettingsPage() {
-  const { db, lang, t, importDB, clearAll, setLang } = useStore();
+  const { db, lang, t, importDB, clearAll, setLang, setNotesEnabled } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState('');
   const [editor, setEditor] = useState<Project | 'new' | null>(null);
@@ -102,6 +102,22 @@ export default function SettingsPage() {
             { value: 'en', label: t('langEn') },
           ]}
         />
+      </div>
+
+      <SectionTitle>{t('notesWall')}</SectionTitle>
+      <div className={`card ${styles.group}`}>
+        <div className={styles.item}>
+          <Icon name="sticky" size={18} />
+          <span className={styles.itemMain}>
+            <b>{t('notesWall')}</b>
+            <i>{t('notesWallHint')}</i>
+          </span>
+          <Switch
+            checked={db.notesEnabled}
+            onChange={setNotesEnabled}
+            label={t('notesWall')}
+          />
+        </div>
       </div>
 
       <SectionTitle>{t('manageProjects')}</SectionTitle>
