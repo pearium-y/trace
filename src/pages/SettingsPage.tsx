@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useStore } from '../store';
-import { DB_KEY, buildExport, parseImport } from '../storage';
+import { buildExport, parseImport } from '../storage';
 import { SectionTitle, Segmented, Switch } from '../components/Basics';
 import { Icon } from '../components/Icon';
 import { BrandMark } from '../components/BrandMark';
@@ -28,13 +28,7 @@ export default function SettingsPage() {
     [db.records],
   );
 
-  const storageKB = useMemo(() => {
-    try {
-      return ((localStorage.getItem(DB_KEY) ?? '').length / 1024).toFixed(1);
-    } catch {
-      return '0';
-    }
-  }, [db]);
+  const storageKB = useMemo(() => (JSON.stringify(db).length / 1024).toFixed(1), [db]);
 
   const exportJSON = () => {
     const name = `trace-backup-${today().replaceAll('-', '')}.json`;

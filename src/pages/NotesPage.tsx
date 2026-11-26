@@ -16,7 +16,7 @@ import styles from './NotesPage.module.css';
 const NOTE_COLORS: PaletteColor[] = ['seal', 'ochre', 'bamboo', 'indigo', 'wisteria'];
 
 export default function NotesPage() {
-  const { db, t, deleteNote, markNoteViewed } = useStore();
+  const { db, t, lang, deleteNote, markNoteViewed } = useStore();
   const [editing, setEditing] = useState<StickyNote | 'new' | null>(null);
   const [viewing, setViewing] = useState<StickyNote | null>(null);
 
@@ -115,7 +115,7 @@ export default function NotesPage() {
                   {t('noteReminderTag')}
                 </span>
               )}
-              <span className="faint">{t('noteCreatedAt', { date: fullDateLabel(viewing.createdAt) })}</span>
+              <span className="faint">{t('noteCreatedAt', { date: fullDateLabel(viewing.createdAt, lang) })}</span>
             </div>
             <div className={styles.detailFoot}>
               <button
