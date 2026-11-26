@@ -109,6 +109,7 @@ npm run build
 - When switching devices or browsers, export a JSON backup via "Settings → Export JSON Backup" and import it in the new environment
 - Upgrading from V1.0: if legacy data (`trace-data-v1`) is detected on startup, the app asks whether to migrate it (all habits go to the default project, old labels are not carried over) or exit the page
 - Upgrading from 1.1.0-rc.1: built-in default tags are removed automatically, while tags you created yourself are kept
+- Upgrading from 1.1.0-rc.3: no data changes; this release only contains refactors and display fixes
 - "Settings → Clear All Data" deletes all plans and records (requires double confirmation; backup is recommended)
 
 ## Project Structure

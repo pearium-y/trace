@@ -1,19 +1,19 @@
 import type { Lang } from './types';
 
-export const APP_VERSION = '1.1.0-rc.3';
+export const APP_VERSION = '1.1.0-rc.4';
 
 /** 当前版本的发行注记 */
 export const RELEASE_NOTES: Record<Lang, string[]> = {
   zh: [
-    '新增可选页面「便签墙」：记录想记住的事或提醒事项，支持每日小红点提醒，并可关联某个习惯；可在「设置」中随时启用或禁用。',
-    '设置中的「关于」卡片现在可以点击查看当前版本的发行注记。',
-    '修复英文界面左上角重复显示 “Trace” 的问题。',
-    '重新绘制网站图标：线条风日历本配手绘同心圆。',
+    '清理无人使用的代码与国际化文案，统一项目、习惯与标签的查找逻辑。',
+    '复用标签胶囊和颜色选择器组件，并拆分项目管理相关组件，降低维护成本。',
+    '修复便签详情页在英文界面下日期仍显示中文的问题。',
+    '修复设置页「占用」在首次进入或数据变更后显示旧值的问题。',
   ],
   en: [
-    'New optional “Notes Wall” page: keep reminders with daily red-dot alerts and link a note to a habit. Enable or disable it anytime in Settings.',
-    'The About card in Settings now opens the release notes for the current version.',
-    'Fixed the duplicated “Trace” label at the top-left in English.',
-    'Redrew the site icon: a line-art calendar with hand-drawn concentric rings.',
+    'Removed unused code and translation keys, and unified project / habit / tag lookup logic.',
+    'Reused shared tag chip and color picker components, and split the project management components to reduce maintenance cost.',
+    'Fixed the note detail date showing Chinese in the English interface.',
+    'Fixed the Settings storage usage showing a stale value on first load or after data changes.',
   ],
 };
