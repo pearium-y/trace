@@ -9,6 +9,7 @@ import { Sheet } from '../components/Sheet';
 import { ProjectEditor } from '../components/ProjectSwitcher';
 import { colorOf, projectLabel } from '../utils/colors';
 import { today } from '../utils/date';
+import { countProjectHabits } from '../utils/entities';
 import { buildCSV } from '../utils/csv';
 import { downloadFile } from '../utils/download';
 import { APP_VERSION, RELEASE_NOTES } from '../version';
@@ -134,7 +135,7 @@ export default function SettingsPage() {
               </span>
               <span className={styles.itemMain}>
                 <b>{projectLabel(p, t)}</b>
-                <i>{t('projectHabitCount', { n: db.habits.filter((h) => h.projectId === p.id).length })}</i>
+                <i>{t('projectHabitCount', { n: countProjectHabits(db.habits, p.id) })}</i>
               </span>
               <Icon name="edit" size={15} className={styles.chev} />
             </button>

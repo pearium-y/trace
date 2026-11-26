@@ -6,6 +6,7 @@ import { Sheet } from '../components/Sheet';
 import { Switch } from '../components/Basics';
 import { colorOf } from '../utils/colors';
 import { fullDateLabel } from '../utils/date';
+import { habitOf } from '../utils/entities';
 import { isNotePending } from '../utils/notes';
 import type { PaletteColor, StickyNote } from '../types';
 import styles from './NotesPage.module.css';
@@ -16,8 +17,6 @@ export default function NotesPage() {
   const { db, t, deleteNote, markNoteViewed } = useStore();
   const [editing, setEditing] = useState<StickyNote | 'new' | null>(null);
   const [viewing, setViewing] = useState<StickyNote | null>(null);
-
-  const habitOf = (id?: string) => (id ? db.habits.find((h) => h.id === id) : undefined);
 
   const list = useMemo(
     () =>
@@ -31,7 +30,7 @@ export default function NotesPage() {
   );
 
   const pendingCount = list.filter((n) => isNotePending(n)).length;
-  const viewingHabit = viewing ? habitOf(viewing.habitId) : undefined;
+  const viewingHabit = viewing?.habitId ? habitOf(db.habits, viewing.habitId) : undefined;
 
   return (
     <div>
@@ -66,7 +65,7 @@ export default function NotesPage() {
         <div className={`${styles.grid} stagger`}>
           {list.map((note) => {
             const def = colorOf(note.color);
-            const habit = habitOf(note.habitId);
+            const habit = note.habitId ? habitOf(db.habits, note.habitId) : undefined;
             const pending = isNotePending(note);
             return (
               <button

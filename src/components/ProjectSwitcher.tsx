@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { useStore } from '../store';
 import type { PaletteColor, Project } from '../types';
 import { COLOR_KEYS, colorOf, paletteLabel, projectLabel, PROJECT_EMOJIS } from '../utils/colors';
+import { countProjectHabits } from '../utils/entities';
 import { Sheet } from './Sheet';
 import { Icon } from './Icon';
 import styles from './ProjectSwitcher.module.css';
@@ -56,7 +57,7 @@ export function ProjectEditor({
 
   const remove = () => {
     if (!project || builtin) return;
-    const count = db.habits.filter((h) => h.projectId === project.id).length;
+    const count = countProjectHabits(db.habits, project.id);
     if (window.confirm(t('deleteProjectConfirm', { name: projectLabel(project, t), n: count }))) {
       deleteProject(project.id);
       onClose();
@@ -231,7 +232,7 @@ export function MobileProjectBar() {
                     <span className="p-name">{projectLabel(p, t)}</span>
                     <span className="p-meta">
                       {t('projectHabitCount', {
-                        n: db.habits.filter((h) => h.projectId === p.id).length,
+                        n: countProjectHabits(db.habits, p.id),
                       })}
                     </span>
                   </span>

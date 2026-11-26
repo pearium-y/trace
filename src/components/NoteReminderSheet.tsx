@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { StickyNote } from '../types';
 import { useStore } from '../store';
+import { habitOf } from '../utils/entities';
 import { Sheet } from './Sheet';
 import { Icon } from './Icon';
 import styles from './NoteReminderSheet.module.css';
@@ -18,7 +19,7 @@ export function NoteReminderSheet({
   const note = notes[index];
   if (!note) return null;
 
-  const habit = note.habitId ? db.habits.find((h) => h.id === note.habitId) : undefined;
+  const habit = note.habitId ? habitOf(db.habits, note.habitId) : undefined;
   const last = index >= notes.length - 1;
 
   const advance = () => {

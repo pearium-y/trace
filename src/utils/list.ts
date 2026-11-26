@@ -1,4 +1,4 @@
-import type { Frequency, GoalType, Habit, PaletteColor, RecordMap } from '../types';
+import type { Frequency, GoalType, Habit, RecordMap } from '../types';
 import { addDays, today } from './date';
 import { computeStreak, habitRangeStat } from './stats';
 
@@ -66,11 +66,6 @@ export function sortHabits(
     return list.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   }
   return list;
-}
-
-export interface TagOption {
-  name: string;
-  color: PaletteColor;
 }
 
 export function applyList(

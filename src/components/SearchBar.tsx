@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '../store';
 import { projectLabel } from '../utils/colors';
+import { projectOf, tagsOf } from '../utils/entities';
 import { Icon } from './Icon';
 
 export function SearchBar({ onOpenHabit }: { onOpenHabit: (id: string) => void }) {
@@ -23,12 +24,9 @@ export function SearchBar({ onOpenHabit }: { onOpenHabit: (id: string) => void }
     if (!q) return [];
     return db.habits
       .filter((h) => {
-        const project = db.projects.find((p) => p.id === h.projectId);
+        const project = projectOf(db.projects, h.projectId);
         const pName = project ? projectLabel(project, t).toLowerCase() : '';
-        const tagNames = h.tagIds
-          .map((id) => db.tags.find((tag) => tag.id === id))
-          .filter((tag) => !!tag)
-          .map((tag) => tag.name.toLowerCase());
+        const tagNames = tagsOf(db.tags, h.tagIds).map((tag) => tag.name.toLowerCase());
         return (
           h.name.toLowerCase().includes(q) ||
           (h.notes ?? '').toLowerCase().includes(q) ||
@@ -81,10 +79,8 @@ export function SearchBar({ onOpenHabit }: { onOpenHabit: (id: string) => void }
             <div className="search-empty">{t('searchNoResults')}</div>
           ) : (
             results.map((h) => {
-              const project = db.projects.find((p) => p.id === h.projectId);
-              const tags = h.tagIds
-                .map((id) => db.tags.find((tag) => tag.id === id))
-                .filter((tag) => !!tag);
+              const project = projectOf(db.projects, h.projectId);
+              const tags = tagsOf(db.tags, h.tagIds);
               return (
                 <button
                   key={h.id}
