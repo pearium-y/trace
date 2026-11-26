@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { StickyNote } from '../types';
 import { useStore } from '../store';
+import { habitOf } from '../utils/entities';
+import { HabitChip } from './TagChips';
 import { Sheet } from './Sheet';
 import { Icon } from './Icon';
 import styles from './NoteReminderSheet.module.css';
@@ -18,7 +20,7 @@ export function NoteReminderSheet({
   const note = notes[index];
   if (!note) return null;
 
-  const habit = note.habitId ? db.habits.find((h) => h.id === note.habitId) : undefined;
+  const habit = note.habitId ? habitOf(db.habits, note.habitId) : undefined;
   const last = index >= notes.length - 1;
 
   const advance = () => {
@@ -42,12 +44,7 @@ export function NoteReminderSheet({
       }
       onClose={advance}
     >
-      {habit && (
-        <span className="tagchip">
-          <Icon name="folder" size={11} />
-          {habit.emoji} {habit.name}
-        </span>
-      )}
+      {habit && <HabitChip habit={habit} />}
       <p className={styles.text}>{note.text}</p>
       <button className="btn btn-primary btn-block" onClick={advance}>
         {last ? t('noteGotIt') : t('noteNext')}

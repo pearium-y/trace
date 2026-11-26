@@ -2,14 +2,15 @@ import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useStore } from '../store';
 import { Icon } from '../components/Icon';
+import { FolderChip, TagChips } from '../components/TagChips';
 import { ListControls } from '../components/ListControls';
 import { colorOf, projectLabel } from '../utils/colors';
 import { addDays, today } from '../utils/date';
+import { habitTagNames, projectOf, tagOptionsFor, tagsOf } from '../utils/entities';
 import { fmtPct } from '../utils/format';
 import { computeStreak, goalText, habitRangeStat } from '../utils/stats';
 import { applyList, emptyFilter } from '../utils/list';
-import type { ListFilter, SortKey, TagOption } from '../utils/list';
-import type { Habit } from '../types';
+import type { ListFilter, SortKey } from '../utils/list';
 import styles from './HabitsPage.module.css';
 
 export default function HabitsPage({
@@ -28,29 +29,15 @@ export default function HabitsPage({
     [db.habits, activeProjectId],
   );
 
-  const tagNamesOf = (h: Habit) =>
-    h.tagIds
-      .map((id) => db.tags.find((tag) => tag.id === id))
-      .filter((tag) => !!tag)
-      .map((tag) => tag.name);
-
   const list = useMemo(
-    () => applyList(projectHabits, db.records, filter, sort, lang, tagNamesOf),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [projectHabits, db.records, db.tags, filter, sort, lang, t],
+    () => applyList(projectHabits, db.records, filter, sort, lang, (h) => habitTagNames(db.tags, h)),
+    [projectHabits, db.records, db.tags, filter, sort, lang],
   );
 
-  const tagOptions = useMemo<TagOption[]>(() => {
-    const source = activeProjectId
-      ? db.tags.filter((tag) => tag.projectId === activeProjectId)
-      : db.tags;
-    const map = new Map<string, TagOption>();
-    for (const tag of source) {
-      const name = tag.name;
-      if (!map.has(name)) map.set(name, { name, color: tag.color });
-    }
-    return [...map.values()];
-  }, [db.tags, activeProjectId, t]);
+  const tagOptions = useMemo(
+    () => tagOptionsFor(db.tags, activeProjectId),
+    [db.tags, activeProjectId],
+  );
 
   return (
     <div>
@@ -88,10 +75,8 @@ export default function HabitsPage({
               const streak = computeStreak(h, db.records);
               const stat30 = habitRangeStat(h, db.records, addDays(today(), -29), today());
               const recordCount = Object.keys(db.records[h.id] ?? {}).length;
-              const project = db.projects.find((p) => p.id === h.projectId);
-              const tags = h.tagIds
-                .map((id) => db.tags.find((tag) => tag.id === id))
-                .filter((tag) => !!tag);
+              const project = projectOf(db.projects, h.projectId);
+              const tags = tagsOf(db.tags, h.tagIds);
               return (
                 <button
                   key={h.id}
@@ -117,20 +102,9 @@ export default function HabitsPage({
                     {(tags.length > 0 || !activeProjectId) && (
                       <span className={styles.tagRow}>
                         {!activeProjectId && project && (
-                          <span className="tagchip">
-                            <Icon name="folder" size={11} />
-                            {projectLabel(project, t)}
-                          </span>
+                          <FolderChip>{projectLabel(project, t)}</FolderChip>
                         )}
-                        {tags.map((tag) => {
-                          const tdef = colorOf(tag.color);
-                          return (
-                            <span key={tag.id} className="tagchip">
-                              <i className="dot" style={{ background: tdef.accent }} />
-                              {tag.name}
-                            </span>
-                          );
-                        })}
+                        <TagChips tags={tags} />
                       </span>
                     )}
                   </span>

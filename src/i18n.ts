@@ -2,7 +2,7 @@ import type { Lang } from './types';
 
 type Dict = Record<string, string>;
 
-const zh: Dict = {
+const zh = {
   appName: '循迹',
   brandSub: 'TRACE',
 
@@ -17,15 +17,11 @@ const zh: Dict = {
   edit: '编辑',
   close: '关闭',
   back: '返回',
-  add: '添加',
-  create: '创建',
   saveChanges: '保存修改',
-  optional: '可选',
   all: '全部',
   search: '搜索',
   none: '无',
 
-  project: '项目',
   projects: '项目',
   allProjects: '全部项目',
   defaultProject: '默认项目',
@@ -39,7 +35,6 @@ const zh: Dict = {
   projectColor: '项目颜色',
   deleteProject: '删除项目',
   deleteProjectConfirm: '确定删除「{name}」吗？其中的 {n} 个习惯、记录与标签将一并删除。',
-  deleteProjectBuiltin: '默认项目不可删除',
   switchProject: '切换项目',
   allProjectsHint: '汇总所有项目的数据',
   projectHabitCount: '{n} 个习惯',
@@ -157,7 +152,6 @@ const zh: Dict = {
   habitNotFound: '该习惯不存在或已被删除',
   backToList: '返回习惯列表',
   editHabit: '编辑习惯',
-  goalCreated: '{goal} · 创建于 {date}',
   createdOn: '创建于 {date}',
   statsTitle: '统计',
   currentStreak: '当前连续',
@@ -182,7 +176,6 @@ const zh: Dict = {
   dayTotal: '当日累计 {v}',
   dec: '减一',
   inc: '加一',
-  goalLabel: '目标',
 
   reportTitle: '报告',
   reportEmpty: '创建习惯并坚持记录后，这里会长出你的分析报告',
@@ -209,7 +202,6 @@ const zh: Dict = {
   notesReview: '备注回顾',
   noNotes: '本期没有留下备注。',
   flat: '持平',
-  allProjectsSummary: '全部项目汇总',
 
   language: '语言',
   langZh: '中文',
@@ -244,20 +236,6 @@ const zh: Dict = {
   exportJsonDone: '已导出备份：{name}',
   exportCsvDone: '已导出记录：{name}',
 
-  migrationTitle: '检测到 V1.0 数据',
-  migrationBody:
-    '本次更新为破坏性变更。你可以将旧数据迁移到新版本（所有习惯归入默认项目，不保留旧标签），或退出网页。',
-  migrationMigrate: '迁移数据并进入',
-  migrationExit: '退出网页',
-  migrationFailed: '迁移失败：旧数据无法解析。',
-  exitedTitle: '已退出',
-  exitedBody: '旧数据未迁移，你可以安全关闭此标签页。',
-  migrationEnTitle: 'V1.0 data detected',
-  migrationEnBody:
-    'This is a breaking update. You can migrate old data (all habits go to the default project; old labels are not kept) or exit the page.',
-  migrationEnMigrate: 'Migrate and continue',
-  migrationEnExit: 'Exit',
-
   sortBy: '排序',
   filter: '筛选',
   sortDefault: '默认顺序',
@@ -271,7 +249,6 @@ const zh: Dict = {
   filterReset: '重置筛选',
   filterConfirm: '完成',
   noMatch: '没有符合筛选条件的习惯。',
-  activeFilters: '{n} 项筛选',
   resultsCount: '{n} 个习惯',
 
   unitDay: '天',
@@ -289,9 +266,9 @@ const zh: Dict = {
   durationH: '{h}小时',
   durationM: '{m}分钟',
   timesUnit: '{n} 次',
-};
+} satisfies Dict;
 
-const en: Dict = {
+const en: Record<keyof typeof zh, string> = {
   appName: 'Trace',
   brandSub: 'HABIT LOG',
 
@@ -306,15 +283,11 @@ const en: Dict = {
   edit: 'Edit',
   close: 'Close',
   back: 'Back',
-  add: 'Add',
-  create: 'Create',
   saveChanges: 'Save changes',
-  optional: 'optional',
   all: 'All',
   search: 'Search',
   none: 'None',
 
-  project: 'Project',
   projects: 'Projects',
   allProjects: 'All projects',
   defaultProject: 'Default project',
@@ -329,7 +302,6 @@ const en: Dict = {
   deleteProject: 'Delete project',
   deleteProjectConfirm:
     'Delete “{name}”? Its {n} habits, records and tags will be permanently deleted.',
-  deleteProjectBuiltin: 'The default project cannot be deleted',
   switchProject: 'Switch project',
   allProjectsHint: 'Aggregate data across all projects',
   projectHabitCount: '{n} habits',
@@ -447,7 +419,6 @@ const en: Dict = {
   habitNotFound: 'This habit does not exist or has been deleted',
   backToList: 'Back to habits',
   editHabit: 'Edit habit',
-  goalCreated: '{goal} · Created on {date}',
   createdOn: 'Created on {date}',
   statsTitle: 'Statistics',
   currentStreak: 'Current streak',
@@ -472,7 +443,6 @@ const en: Dict = {
   dayTotal: 'Today total {v}',
   dec: 'Decrease',
   inc: 'Increase',
-  goalLabel: 'Goal',
 
   reportTitle: 'Report',
   reportEmpty: 'Create habits and keep recording — your report will grow here',
@@ -499,7 +469,6 @@ const en: Dict = {
   notesReview: 'Notes review',
   noNotes: 'No notes in this period.',
   flat: 'Flat',
-  allProjectsSummary: 'All projects',
 
   language: 'Language',
   langZh: '中文',
@@ -536,20 +505,6 @@ const en: Dict = {
   exportJsonDone: 'Backup exported: {name}',
   exportCsvDone: 'Records exported: {name}',
 
-  migrationTitle: 'V1.0 data detected',
-  migrationBody:
-    'This is a breaking update. You can migrate old data (all habits go to the default project; old labels are not kept) or exit the page.',
-  migrationMigrate: 'Migrate and continue',
-  migrationExit: 'Exit',
-  migrationFailed: 'Migration failed: old data could not be parsed.',
-  exitedTitle: 'Exited',
-  exitedBody: 'Old data was not migrated. You can safely close this tab.',
-  migrationEnTitle: 'V1.0 data detected',
-  migrationEnBody:
-    'This is a breaking update. You can migrate old data (all habits go to the default project; old labels are not kept) or exit the page.',
-  migrationEnMigrate: 'Migrate and continue',
-  migrationEnExit: 'Exit',
-
   sortBy: 'Sort',
   filter: 'Filter',
   sortDefault: 'Default order',
@@ -563,7 +518,6 @@ const en: Dict = {
   filterReset: 'Reset filters',
   filterConfirm: 'Done',
   noMatch: 'No habits match the current filters.',
-  activeFilters: '{n} filters',
   resultsCount: '{n} habits',
 
   unitDay: 'd',
@@ -583,14 +537,15 @@ const en: Dict = {
   timesUnit: '{n}×',
 };
 
-const DICTS: Record<Lang, Dict> = { zh, en };
+const zhDict: Dict = zh;
+const DICTS: Record<Lang, Dict> = { zh: zhDict, en };
 
 export type T = (key: string, vars?: Record<string, string | number>) => string;
 
 export function makeT(lang: Lang): T {
   const dict = DICTS[lang] ?? zh;
   return (key, vars) => {
-    let text = dict[key] ?? zh[key] ?? key;
+    let text = dict[key] ?? zhDict[key] ?? key;
     if (vars) {
       for (const [k, v] of Object.entries(vars)) {
         text = text.replaceAll(`{${k}}`, String(v));

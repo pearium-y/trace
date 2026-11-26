@@ -1,14 +1,15 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { useStore } from '../store';
-import { DB_KEY, buildExport, parseImport } from '../storage';
+import { buildExport, parseImport } from '../storage';
 import { SectionTitle, Segmented, Switch } from '../components/Basics';
 import { Icon } from '../components/Icon';
 import { BrandMark } from '../components/BrandMark';
 import { Sheet } from '../components/Sheet';
-import { ProjectEditor } from '../components/ProjectSwitcher';
+import { ProjectEditor } from '../components/ProjectEditor';
 import { colorOf, projectLabel } from '../utils/colors';
 import { today } from '../utils/date';
+import { countProjectHabits } from '../utils/entities';
 import { buildCSV } from '../utils/csv';
 import { downloadFile } from '../utils/download';
 import { APP_VERSION, RELEASE_NOTES } from '../version';
@@ -27,13 +28,7 @@ export default function SettingsPage() {
     [db.records],
   );
 
-  const storageKB = useMemo(() => {
-    try {
-      return ((localStorage.getItem(DB_KEY) ?? '').length / 1024).toFixed(1);
-    } catch {
-      return '0';
-    }
-  }, [db]);
+  const storageKB = useMemo(() => (JSON.stringify(db).length / 1024).toFixed(1), [db]);
 
   const exportJSON = () => {
     const name = `trace-backup-${today().replaceAll('-', '')}.json`;
@@ -134,7 +129,7 @@ export default function SettingsPage() {
               </span>
               <span className={styles.itemMain}>
                 <b>{projectLabel(p, t)}</b>
-                <i>{t('projectHabitCount', { n: db.habits.filter((h) => h.projectId === p.id).length })}</i>
+                <i>{t('projectHabitCount', { n: countProjectHabits(db.habits, p.id) })}</i>
               </span>
               <Icon name="edit" size={15} className={styles.chev} />
             </button>

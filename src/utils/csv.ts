@@ -1,6 +1,7 @@
-import type { DB, Lang, Project, Tag } from '../types';
+import type { DB, Lang } from '../types';
 import { makeT } from '../i18n';
 import { projectLabel } from './colors';
+import { projectOf, tagsOf } from './entities';
 
 /** 构建 Excel 友好（UTF-8 BOM）的 CSV 记录明细 */
 export function buildCSV(db: DB, lang: Lang = db.lang): string {
@@ -13,15 +14,10 @@ export function buildCSV(db: DB, lang: Lang = db.lang): string {
   const lines = [header.join(',')];
   const habits = [...db.habits].sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
   const projectName = (id: string) => {
-    const p = db.projects.find((x: Project) => x.id === id);
+    const p = projectOf(db.projects, id);
     return p ? projectLabel(p, t) : '';
   };
-  const tagNames = (ids: string[]) =>
-    ids
-      .map((id) => db.tags.find((tag: Tag) => tag.id === id))
-      .filter((tag): tag is Tag => !!tag)
-      .map((tag) => tag.name)
-      .join(' / ');
+  const tagNames = (ids: string[]) => tagsOf(db.tags, ids).map((tag) => tag.name).join(' / ');
 
   for (const h of habits) {
     const days = db.records[h.id] ?? {};

@@ -8,9 +8,10 @@ import { Icon } from '../components/Icon';
 import { dateLabel, fullDateLabel, today, weekdayLabel } from '../utils/date';
 import { computeStreak, dayValue, overallDayRatio } from '../utils/stats';
 import { projectLabel } from '../utils/colors';
+import { habitTagNames, projectOf, tagOptionsFor, tagsOf } from '../utils/entities';
 import { applyList, emptyFilter } from '../utils/list';
 import { pendingNotesForHabit } from '../utils/notes';
-import type { ListFilter, SortKey, TagOption } from '../utils/list';
+import type { ListFilter, SortKey } from '../utils/list';
 import type { Habit, StickyNote } from '../types';
 import styles from './TodayPage.module.css';
 
@@ -32,29 +33,15 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
   );
   const due = projectHabits.filter((h) => h.createdAt <= selDate);
 
-  const tagNamesOf = (h: Habit) =>
-    h.tagIds
-      .map((id) => db.tags.find((tag) => tag.id === id))
-      .filter((tag) => !!tag)
-      .map((tag) => tag.name);
-
   const list = useMemo(
-    () => applyList(due, db.records, filter, sort, lang, tagNamesOf),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [due, db.records, db.tags, filter, sort, lang, t],
+    () => applyList(due, db.records, filter, sort, lang, (h) => habitTagNames(db.tags, h)),
+    [due, db.records, db.tags, filter, sort, lang],
   );
 
-  const tagOptions = useMemo<TagOption[]>(() => {
-    const source = activeProjectId
-      ? db.tags.filter((tag) => tag.projectId === activeProjectId)
-      : db.tags;
-    const map = new Map<string, TagOption>();
-    for (const tag of source) {
-      const name = tag.name;
-      if (!map.has(name)) map.set(name, { name, color: tag.color });
-    }
-    return [...map.values()];
-  }, [db.tags, activeProjectId, t]);
+  const tagOptions = useMemo(
+    () => tagOptionsFor(db.tags, activeProjectId),
+    [db.tags, activeProjectId],
+  );
 
   const recordedCount = due.filter((h) => db.records[h.id]?.[selDate]).length;
 
@@ -206,10 +193,8 @@ export default function TodayPage({ onCreate }: { onCreate: () => void }) {
 
           <div className={`${styles.list} stagger`}>
             {list.map((h) => {
-              const project = db.projects.find((p) => p.id === h.projectId);
-              const tags = h.tagIds
-                .map((id) => db.tags.find((tag) => tag.id === id))
-                .filter((tag) => !!tag);
+              const project = projectOf(db.projects, h.projectId);
+              const tags = tagsOf(db.tags, h.tagIds);
               return (
                 <HabitCard
                   key={h.id}

@@ -4,10 +4,11 @@ import { useStore } from '../store';
 import { DEFAULT_PROJECT_ID } from '../storage';
 import type { Frequency, GoalType, PaletteColor, Tag } from '../types';
 import { Segmented } from '../components/Basics';
+import { ColorPicker } from '../components/ColorPicker';
 import { HabitCard } from '../components/HabitCard';
 import { Icon } from '../components/Icon';
 import { TagSheet } from '../components/TagSheet';
-import { COLOR_KEYS, colorOf, EMOJIS, paletteLabel, projectLabel } from '../utils/colors';
+import { colorOf, EMOJIS, projectLabel } from '../utils/colors';
 import { today } from '../utils/date';
 import styles from './HabitFormPage.module.css';
 
@@ -207,22 +208,7 @@ export default function HabitFormPage({
 
       <div className="field">
         <span className="field-label">{t('habitColor')}</span>
-        <div className={styles.colorRow}>
-          {COLOR_KEYS.map((c) => {
-            const def = colorOf(c);
-            return (
-              <button
-                key={c}
-                type="button"
-                className={`${styles.colorDot} ${c === color ? styles.colorOn : ''}`}
-                style={{ background: def.accent } as CSSProperties}
-                onClick={() => setColor(c)}
-                title={paletteLabel(c, t)}
-                aria-label={paletteLabel(c, t)}
-              />
-            );
-          })}
-        </div>
+        <ColorPicker value={color} onChange={setColor} size={33} gap={13} />
       </div>
 
       <div className="field">

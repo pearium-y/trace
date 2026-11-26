@@ -31,6 +31,11 @@ A paper-textured journal-style habit and plan tracking app: create habits, daily
 ### Habit Notes
 - Attach a free-form note to a habit itself, shown on its detail page and included in global search
 
+### Notes Wall
+- Optional page (enable in Settings) for free-form sticky notes with daily reminder red dots
+- Link a note to a habit; its reminder appears when you open the linked habit
+- Pick a note color; notes are included in the same JSON backup as everything else
+
 ### Check-in Recording
 - Enter values corresponding to plan goals (count or minutes)
 - Multiple entries on the same day only update that day's value, **no accumulation**
@@ -100,24 +105,29 @@ npm run build
 
 ## Data Notes
 
-- All data (projects + tags + habits + records) is stored in browser localStorage (key: `trace-data-v2`), never uploaded to any server
+- All data (projects + tags + habits + records + notes) is stored in browser localStorage (key: `trace-data-v2`), never uploaded to any server
 - When switching devices or browsers, export a JSON backup via "Settings → Export JSON Backup" and import it in the new environment
 - Upgrading from V1.0: if legacy data (`trace-data-v1`) is detected on startup, the app asks whether to migrate it (all habits go to the default project, old labels are not carried over) or exit the page
 - Upgrading from 1.1.0-rc.1: built-in default tags are removed automatically, while tags you created yourself are kept
+- Upgrading from 1.1.0-rc.3: no data changes; this release only contains refactors and display fixes
 - "Settings → Clear All Data" deletes all plans and records (requires double confirmation; backup is recommended)
 
 ## Project Structure
 
 ```
 src/
-├── App.tsx              # Application entry and routing (simple state‑based routing)
+├── App.tsx              # Application entry and routing (simple state-based routing)
+├── main.tsx             # React root
 ├── store.tsx            # Global state (Context + useReducer + localStorage persistence)
-├── storage.ts           # Data parsing / validation / import / export
+├── storage.ts           # Data parsing / validation / import / export / V1 migration
 ├── types.ts             # Core type definitions (Habit / DayRecord / DB)
-├── components/          # Reusable components (heatmap, bar chart, record popup, bottom navigation, etc.)
-├── pages/               # Pages (Today / Plans / Detail / Form / Report / Settings)
-├── utils/               # Utilities (dates, statistics, formatting, CSV, download)
+├── i18n.ts              # Chinese / English dictionaries
+├── version.ts           # App version and release notes
+├── components/          # Reusable components (heatmap, bar chart, sheets, project switcher, etc.)
+├── pages/               # Pages (Today / Habits / Detail / Form / Report / Notes / Settings)
+├── utils/               # Utilities (dates, stats, list filtering, lookups, colors, CSV, notes)
 └── styles/              # Global styles and design system
+public/                  # Static assets (favicon, web manifest)
 ```
 
 ## License

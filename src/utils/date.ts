@@ -44,7 +44,6 @@ const MONTHS_SHORT: Record<Lang, string[]> = {
   en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 };
 
-export const weekdays = (lang: Lang): string[] => WEEKDAYS[lang];
 export const weekdaysShort = (lang: Lang): string[] => WEEKDAYS_SHORT[lang];
 export const monthShort = (m: number, lang: Lang): string => MONTHS_SHORT[lang][m];
 

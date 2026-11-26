@@ -68,11 +68,6 @@ export function sortHabits(
   return list;
 }
 
-export interface TagOption {
-  name: string;
-  color: import('../types').PaletteColor;
-}
-
 export function applyList(
   habits: Habit[],
   records: RecordMap,

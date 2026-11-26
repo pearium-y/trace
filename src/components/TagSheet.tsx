@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import type { CSSProperties } from 'react';
 import { useStore } from '../store';
 import type { PaletteColor, Tag } from '../types';
-import { COLOR_KEYS, colorOf, paletteLabel } from '../utils/colors';
+import { colorOf } from '../utils/colors';
+import { ColorPicker } from './ColorPicker';
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
 import styles from './TagSheet.module.css';
@@ -67,19 +67,7 @@ function TagForm({
 
       <div className="field">
         <span className="field-label">{t('tagColor')}</span>
-        <div className="color-row">
-          {COLOR_KEYS.map((c) => (
-            <button
-              key={c}
-              type="button"
-              className={`color-dot ${c === color ? 'on' : ''}`}
-              style={{ background: colorOf(c).accent } as CSSProperties}
-              onClick={() => setColor(c)}
-              title={paletteLabel(c, t)}
-              aria-label={paletteLabel(c, t)}
-            />
-          ))}
-        </div>
+        <ColorPicker value={color} onChange={setColor} />
       </div>
 
       <div className={styles.footer}>

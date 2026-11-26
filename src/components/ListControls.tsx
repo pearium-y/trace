@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useStore } from '../store';
-import type { ListFilter, SortKey, TagOption } from '../utils/list';
+import type { ListFilter, SortKey } from '../utils/list';
 import { countActiveFilters, emptyFilter } from '../utils/list';
+import type { TagOption } from '../utils/entities';
 import { colorOf } from '../utils/colors';
 import { Segmented } from './Basics';
 import { Icon } from './Icon';

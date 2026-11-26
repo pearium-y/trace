@@ -5,9 +5,11 @@ import { HeatLegend, YearHeatmap } from '../components/Heatmap';
 import { RecordSheet } from '../components/RecordSheet';
 import { NoteReminderSheet } from '../components/NoteReminderSheet';
 import { SectionTitle } from '../components/Basics';
+import { FolderChip, TagChips } from '../components/TagChips';
 import { Icon } from '../components/Icon';
 import { colorOf, projectLabel } from '../utils/colors';
 import { addDays, relativeDayLabel, today } from '../utils/date';
+import { habitOf, projectOf, tagsOf } from '../utils/entities';
 import { fmtDuration, fmtPct } from '../utils/format';
 import { pendingNotesForHabit } from '../utils/notes';
 import { computeStreak, dayRatio, dayValue, goalText, habitRangeStat, heatLevel, valueLabel } from '../utils/stats';
@@ -34,7 +36,7 @@ export default function HabitDetailPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habitId]);
 
-  const habit = db.habits.find((h) => h.id === habitId);
+  const habit = habitOf(db.habits, habitId);
 
   if (!habit) {
     return (
@@ -55,10 +57,8 @@ export default function HabitDetailPage({
   const recordDays = Object.keys(records).length;
   const isWeekly = habit.frequency === 'weekly';
   const unit = isWeekly ? t('unitWeek') : t('unitDay');
-  const project = db.projects.find((p) => p.id === habit.projectId);
-  const tags = habit.tagIds
-    .map((id) => db.tags.find((tag) => tag.id === id))
-    .filter((tag) => !!tag);
+  const project = projectOf(db.projects, habit.projectId);
+  const tags = tagsOf(db.tags, habit.tagIds);
 
   const cellOf = (d: string) => {
     const v = dayValue(db.records, habit.id, d);
@@ -96,21 +96,8 @@ export default function HabitDetailPage({
         </p>
         {(project || tags.length > 0) && (
           <div className={styles.tagRow}>
-            {project && (
-              <span className="tagchip">
-                <Icon name="folder" size={11} />
-                {projectLabel(project, t)}
-              </span>
-            )}
-            {tags.map((tag) => {
-              const tdef = colorOf(tag.color);
-              return (
-                <span key={tag.id} className="tagchip">
-                  <i className="dot" style={{ background: tdef.accent }} />
-                  {tag.name}
-                </span>
-              );
-            })}
+            {project && <FolderChip>{projectLabel(project, t)}</FolderChip>}
+            <TagChips tags={tags} />
           </div>
         )}
         <YearHeatmap cellOf={cellOf} ramp={def.ramp} onSelect={(d) => setEditingDate(d)} lang={lang} />
