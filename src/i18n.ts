@@ -90,7 +90,6 @@ const zh: Dict = {
   notesWallHint: '记录提醒便签，可设置每日小红点提醒并关联习惯',
   notesCount: '{n} 张便签',
   notesPending: '{n} 张待查看',
-  noteReminderBadge: '{n} 张便签待查看',
   noteViewed: '今日已查看',
   noteLinkedHabit: '关联习惯',
   noteReminderTag: '每日提醒',
@@ -99,7 +98,6 @@ const zh: Dict = {
   noteReminderTitle: '便签提醒',
   noteGotIt: '知道了',
   noteNext: '下一条',
-  noteOpenHint: '点击查看完整内容',
 
   todayTitle: '今日',
   backfillTitle: '补录',
@@ -382,7 +380,6 @@ const en: Dict = {
   notesWallHint: 'Keep reminder notes with daily red dots and optional habit links',
   notesCount: '{n} notes',
   notesPending: '{n} to view',
-  noteReminderBadge: '{n} notes to view',
   noteViewed: 'Viewed today',
   noteLinkedHabit: 'Linked habit',
   noteReminderTag: 'Daily reminder',
@@ -391,7 +388,6 @@ const en: Dict = {
   noteReminderTitle: 'Note reminder',
   noteGotIt: 'Got it',
   noteNext: 'Next',
-  noteOpenHint: 'Tap to read the full note',
 
   todayTitle: 'Today',
   backfillTitle: 'Backfill',

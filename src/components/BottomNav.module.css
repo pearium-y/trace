@@ -55,6 +55,13 @@
   line-height: 1;
 }
 
+@media (max-width: 430px) {
+  .item {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+}
+
 @media (min-width: 900px) {
   .nav {
     display: none;
