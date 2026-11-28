@@ -20,6 +20,7 @@ import {
   createHabitItem,
   keepKnownHabits,
   loadRushPlan,
+  maxDurationAt,
   minutesToHHMM,
   nowMinutes,
   parseHHMM,
@@ -241,8 +242,8 @@ export default function RushPage() {
   const recordingRecord = recordingId ? db.records[recordingId]?.[recordingDate] : undefined;
 
   const saveDuration = (duration: number) => {
-    if (!plan || !editingBlock || !editingBlock.item) return;
-    const max = Math.max(1, DAY_MINUTES - editingBlock.start);
+    if (!plan || !editingBlock || !editingBlock.item || editingBlock.index === undefined) return;
+    const max = maxDurationAt(plan, editingBlock.index);
     const clamped = Math.max(1, Math.min(max, Math.floor(duration)));
     const targetId = editingBlock.item.id;
     commit({
@@ -518,6 +519,7 @@ export default function RushPage() {
         <DurationSheet
           block={editingBlock}
           habit={editingHabit}
+          max={plan && editingBlock.index !== undefined ? maxDurationAt(plan, editingBlock.index) : 1}
           onClose={() => setEditingId(null)}
           onSave={saveDuration}
         />
@@ -550,19 +552,21 @@ export default function RushPage() {
 function DurationSheet({
   block,
   habit,
+  max,
   onClose,
   onSave,
 }: {
   block: RushBlock;
   habit?: Habit;
+  max: number;
   onClose: () => void;
   onSave: (duration: number) => void;
 }) {
   const { t } = useStore();
   const isBreak = block.kind === 'break';
-  const max = Math.max(1, DAY_MINUTES - block.start);
+  const limit = Math.max(1, max);
   const [duration, setDuration] = useState(() =>
-    Math.max(1, Math.min(max, block.end - block.start)),
+    Math.max(1, Math.min(limit, block.end - block.start)),
   );
   const end = Math.min(block.start + duration, DAY_MINUTES);
   const endInput = end >= DAY_MINUTES ? '23:59' : minutesToHHMM(end);

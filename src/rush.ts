@@ -168,6 +168,20 @@ export function appendStart(plan: RushPlan, kind: RushItem['kind']): number {
   return Math.min(cursor, DAY_MINUTES);
 }
 
+/** 在保证后续安排仍能排进今天的前提下，某个项目允许的最大时长 */
+export function maxDurationAt(plan: RushPlan, index: number): number {
+  const block = computeSchedule(plan).find((b) => b.index === index);
+  if (!block) return 1;
+  let tail = 0;
+  for (let i = index + 1; i < plan.items.length; i += 1) {
+    const prev = plan.items[i - 1];
+    const current = plan.items[i];
+    if (prev && prev.kind === 'habit' && current.kind === 'habit') tail += REST_MINUTES;
+    tail += current.duration;
+  }
+  return Math.max(1, DAY_MINUTES - block.start - tail);
+}
+
 /** 移除已不存在的习惯引用 */
 export function keepKnownHabits(items: RushItem[], habitIds: Set<string>): RushItem[] {
   return items.filter((item) => item.kind === 'break' || habitIds.has(item.habitId));
