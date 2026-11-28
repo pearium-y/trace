@@ -17,7 +17,7 @@ import type { Project } from '../types';
 import styles from './SettingsPage.module.css';
 
 export default function SettingsPage() {
-  const { db, lang, t, importDB, clearAll, setLang, setNotesEnabled } = useStore();
+  const { db, lang, t, importDB, clearAll, setLang, setNotesEnabled, setRushEnabled } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState('');
   const [editor, setEditor] = useState<Project | 'new' | null>(null);
@@ -115,8 +115,23 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <SectionTitle>{t('manageProjects')}</SectionTitle>
+      <SectionTitle>{t('rush')}</SectionTitle>
       <div className={`card ${styles.group}`}>
+        <div className={styles.item}>
+          <Icon name="clock" size={18} />
+          <span className={styles.itemMain}>
+            <b>{t('rush')}</b>
+            <i>{t('rushHint')}</i>
+          </span>
+          <Switch
+            checked={db.rushEnabled}
+            onChange={setRushEnabled}
+            label={t('rush')}
+          />
+        </div>
+      </div>
+
+      <SectionTitle>{t('manageProjects')}</SectionTitle>      <div className={`card ${styles.group}`}>
         {db.projects.map((p) => {
           const def = colorOf(p.color);
           return (
