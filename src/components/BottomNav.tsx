@@ -3,15 +3,16 @@ import { Icon } from './Icon';
 import type { IconName } from './Icon';
 import styles from './BottomNav.module.css';
 
-export type TabKey = 'today' | 'habits' | 'report' | 'notes' | 'settings';
+export type TabKey = 'today' | 'habits' | 'report' | 'notes' | 'rush' | 'settings';
 
-const TAB_KEYS: TabKey[] = ['today', 'habits', 'report', 'notes', 'settings'];
+const TAB_KEYS: TabKey[] = ['today', 'habits', 'report', 'notes', 'rush', 'settings'];
 
 const TAB_ICONS: Record<TabKey, IconName> = {
   today: 'today',
   habits: 'habits',
   report: 'report',
   notes: 'sticky',
+  rush: 'clock',
   settings: 'settings',
 };
 
@@ -20,12 +21,16 @@ const TAB_LABELS: Record<TabKey, string> = {
   habits: 'tabHabits',
   report: 'tabReport',
   notes: 'tabNotes',
+  rush: 'rush',
   settings: 'tabSettings',
 };
 
 export function useTabs() {
   const { db, t } = useStore();
-  return TAB_KEYS.filter((key) => key !== 'notes' || db.notesEnabled).map((key) => ({
+  return TAB_KEYS.filter(
+    (key) =>
+      (key !== 'notes' || db.notesEnabled) && (key !== 'rush' || db.rushEnabled),
+  ).map((key) => ({
     key,
     label: t(TAB_LABELS[key]),
     icon: TAB_ICONS[key],

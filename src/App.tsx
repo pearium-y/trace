@@ -9,6 +9,7 @@ import { Icon } from './components/Icon';
 import { BrandMark } from './components/BrandMark';
 import { MobileProjectBar } from './components/MobileProjectBar';
 import { ProjectNav } from './components/ProjectNav';
+import { RushPicker } from './components/RushPicker';
 import { SearchBar } from './components/SearchBar';
 import { pendingNotes } from './utils/notes';
 import TodayPage from './pages/TodayPage';
@@ -18,6 +19,7 @@ import HabitFormPage from './pages/HabitFormPage';
 import ReportPage from './pages/ReportPage';
 import SettingsPage from './pages/SettingsPage';
 import NotesPage from './pages/NotesPage';
+import RushPage from './pages/RushPage';
 
 type View = { tab: TabKey } | { page: 'habit'; id: string } | { page: 'habit-form'; id?: string };
 
@@ -43,7 +45,10 @@ function Shell() {
 
   useEffect(() => {
     if (!db.notesEnabled && 'tab' in view && view.tab === 'notes') setView({ tab: 'today' });
-  }, [db.notesEnabled, view]);
+    if (!db.rushEnabled && 'tab' in view && view.tab === 'rush') setView({ tab: 'today' });
+  }, [db.notesEnabled, db.rushEnabled, view]);
+
+  const isRush = 'tab' in view && view.tab === 'rush';
 
   const openHabit = (id: string) => setView({ page: 'habit', id });
   const backFromHabit = () => {
@@ -69,6 +74,8 @@ function Shell() {
       content = <ReportPage />;
     } else if (view.tab === 'notes') {
       content = <NotesPage />;
+    } else if (view.tab === 'rush') {
+      content = <RushPage />;
     } else {
       content = <SettingsPage />;
     }
@@ -96,34 +103,42 @@ function Shell() {
   return (
     <>
       <aside className="sidenav">
-        <div className="brand">
-          <BrandMark size={42} className="brand-logo" />
-          <div>
-            <div className="brand-name">{t('appName')}</div>
-            <div className="brand-sub">{t('brandSub')}</div>
-          </div>
-        </div>
-        <ProjectNav />
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            className={`sidenav-item ${activeTab === tab.key ? 'active' : ''}`}
-            onClick={() => setView({ tab: tab.key })}
-          >
-            <Icon name={tab.icon} size={20} />
-            {tab.label}
-            {tab.key === 'notes' && pendingNoteCount > 0 && (
-              <span className="nav-badge">{pendingNoteCount}</span>
-            )}
-          </button>
-        ))}
+        {isRush ? (
+          <RushPicker onBack={() => setView({ tab: 'today' })} />
+        ) : (
+          <>
+            <div className="brand">
+              <BrandMark size={42} className="brand-logo" />
+              <div>
+                <div className="brand-name">{t('appName')}</div>
+                <div className="brand-sub">{t('brandSub')}</div>
+              </div>
+            </div>
+            <ProjectNav />
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                className={`sidenav-item ${activeTab === tab.key ? 'active' : ''}`}
+                onClick={() => setView({ tab: tab.key })}
+              >
+                <Icon name={tab.icon} size={20} />
+                {tab.label}
+                {tab.key === 'notes' && pendingNoteCount > 0 && (
+                  <span className="nav-badge">{pendingNoteCount}</span>
+                )}
+              </button>
+            ))}
+          </>
+        )}
       </aside>
       <div className={`maincol ${hasNav ? 'has-nav' : ''}`}>
-        <div className="topbar">
-          <MobileProjectBar />
-          <SearchBar onOpenHabit={openHabit} />
-        </div>
-        <main className="page" key={key}>
+        {!isRush && (
+          <div className="topbar">
+            <MobileProjectBar />
+            <SearchBar onOpenHabit={openHabit} />
+          </div>
+        )}
+        <main className={`page ${isRush ? 'rush-page' : ''}`} key={key}>
           {content}
         </main>
       </div>
