@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer } from 'react
 import type { ReactNode } from 'react';
 import type { DB, Habit, Lang, Project, StickyNote, Tag } from './types';
 import { createDefaultDB, DEFAULT_PROJECT_ID, loadDB, saveDB } from './storage';
+import { saveRushPlan } from './rush';
 import { today } from './utils/date';
 import { makeT } from './i18n';
 import type { T } from './i18n';
@@ -251,7 +252,10 @@ export function StoreProvider({
       deleteNote: (id) => dispatch({ type: 'deleteNote', id }),
       markNoteViewed: (id) => dispatch({ type: 'viewNote', id, date: today() }),
       importDB: (next) => dispatch({ type: 'importDB', db: next }),
-      clearAll: () => dispatch({ type: 'clearAll' }),
+      clearAll: () => {
+        saveRushPlan(null);
+        dispatch({ type: 'clearAll' });
+      },
     };
   }, [db]);
 
