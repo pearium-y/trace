@@ -36,6 +36,15 @@ A paper-textured journal-style habit and plan tracking app: create habits, daily
 - Link a note to a habit; its reminder appears when you open the linked habit
 - Pick a note color; notes are included in the same JSON backup as everything else
 
+### Rush (optional)
+- Optional timeline workspace (enable in Settings) for laying out today’s habits in order, like building blocks
+- Drag habits from the dedicated sidebar (or tap to add from the mobile drawer) and they line up automatically from the start time you choose
+- 25 minutes per habit by default, with an automatic 5-minute rest between habits; long breaks can be dragged in and adjusted freely
+- Click a scheduled habit to change its duration; earlier and later items shift automatically
+- Mark a habit done to strike it through and open its record card; overdue items show a warning mark
+- Edit mode reorders scheduled items (rest blocks and the timeline hide while dragging)
+- Export the day’s plan as an `.ics` calendar file (habits only); plans are kept for today only and clear automatically the next day
+
 ### Check-in Recording
 - Enter values corresponding to plan goals (count or minutes)
 - Multiple entries on the same day only update that day's value, **no accumulation**
@@ -106,10 +115,12 @@ npm run build
 ## Data Notes
 
 - All data (projects + tags + habits + records + notes) is stored in browser localStorage (key: `trace-data-v2`), never uploaded to any server
+- The Rush plan is stored separately (key: `trace-rush-v1`) and only for the current day; it is not included in the JSON backup and clears automatically the next day. The Rush on/off switch is part of the main data
 - When switching devices or browsers, export a JSON backup via "Settings → Export JSON Backup" and import it in the new environment
 - Upgrading from V1.0: if legacy data (`trace-data-v1`) is detected on startup, the app asks whether to migrate it (all habits go to the default project, old labels are not carried over) or exit the page
 - Upgrading from 1.1.0-rc.1: built-in default tags are removed automatically, while tags you created yourself are kept
 - Upgrading from 1.1.0-rc.3: no data changes; this release only contains refactors and display fixes
+- Upgrading from 1.1.0-rc.4: no data changes; Rush is off by default and can be enabled in Settings
 - "Settings → Clear All Data" deletes all plans and records (requires double confirmation; backup is recommended)
 
 ## Project Structure
@@ -120,12 +131,13 @@ src/
 ├── main.tsx             # React root
 ├── store.tsx            # Global state (Context + useReducer + localStorage persistence)
 ├── storage.ts           # Data parsing / validation / import / export / V1 migration
+├── rush.ts              # Rush plan model, daily persistence and schedule engine
 ├── types.ts             # Core type definitions (Habit / DayRecord / DB)
 ├── i18n.ts              # Chinese / English dictionaries
 ├── version.ts           # App version and release notes
-├── components/          # Reusable components (heatmap, bar chart, sheets, project switcher, etc.)
-├── pages/               # Pages (Today / Habits / Detail / Form / Report / Notes / Settings)
-├── utils/               # Utilities (dates, stats, list filtering, lookups, colors, CSV, notes)
+├── components/          # Reusable components (heatmap, bar chart, sheets, rush picker, etc.)
+├── pages/               # Pages (Today / Habits / Detail / Form / Report / Notes / Rush / Settings)
+├── utils/               # Utilities (dates, stats, list filtering, lookups, colors, CSV, ICS, notes)
 └── styles/              # Global styles and design system
 public/                  # Static assets (favicon, web manifest)
 ```
