@@ -73,6 +73,8 @@ export interface DB {
   /** 便签墙功能开关 */
   notesEnabled: boolean;
   notes: StickyNote[];
+  /** 快排功能开关 */
+  rushEnabled: boolean;
   /** null = 全部项目汇总 */
   activeProjectId: string | null;
   lang: Lang;
@@ -88,5 +90,6 @@ export interface ExportPayload {
   records: RecordMap;
   notesEnabled?: boolean;
   notes?: StickyNote[];
+  rushEnabled?: boolean;
   lang: Lang;
 }

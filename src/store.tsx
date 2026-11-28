@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer } from 'react
 import type { ReactNode } from 'react';
 import type { DB, Habit, Lang, Project, StickyNote, Tag } from './types';
 import { createDefaultDB, DEFAULT_PROJECT_ID, loadDB, saveDB } from './storage';
+import { saveRushPlan } from './rush';
 import { today } from './utils/date';
 import { makeT } from './i18n';
 import type { T } from './i18n';
@@ -29,6 +30,7 @@ type Action =
   | { type: 'setRecord'; habitId: string; date: string; value: number; note?: string }
   | { type: 'removeRecord'; habitId: string; date: string }
   | { type: 'setNotesEnabled'; enabled: boolean }
+  | { type: 'setRushEnabled'; enabled: boolean }
   | { type: 'addNote'; note: StickyNote }
   | { type: 'updateNote'; id: string; patch: Partial<NoteInput> }
   | { type: 'deleteNote'; id: string }
@@ -127,6 +129,8 @@ function reducer(db: DB, action: Action): DB {
     }
     case 'setNotesEnabled':
       return { ...db, notesEnabled: action.enabled };
+    case 'setRushEnabled':
+      return { ...db, rushEnabled: action.enabled };
     case 'addNote':
       return { ...db, notes: [...db.notes, action.note] };
     case 'updateNote':
@@ -174,6 +178,7 @@ export interface StoreValue {
   setRecord: (habitId: string, date: string, value: number, note?: string) => void;
   removeRecord: (habitId: string, date: string) => void;
   setNotesEnabled: (enabled: boolean) => void;
+  setRushEnabled: (enabled: boolean) => void;
   addNote: (input: NoteInput) => StickyNote;
   updateNote: (id: string, patch: Partial<NoteInput>) => void;
   deleteNote: (id: string) => void;
@@ -232,6 +237,7 @@ export function StoreProvider({
         dispatch({ type: 'setRecord', habitId, date, value, note }),
       removeRecord: (habitId, date) => dispatch({ type: 'removeRecord', habitId, date }),
       setNotesEnabled: (enabled) => dispatch({ type: 'setNotesEnabled', enabled }),
+      setRushEnabled: (enabled) => dispatch({ type: 'setRushEnabled', enabled }),
       addNote: (input) => {
         const note: StickyNote = {
           ...input,
@@ -246,7 +252,10 @@ export function StoreProvider({
       deleteNote: (id) => dispatch({ type: 'deleteNote', id }),
       markNoteViewed: (id) => dispatch({ type: 'viewNote', id, date: today() }),
       importDB: (next) => dispatch({ type: 'importDB', db: next }),
-      clearAll: () => dispatch({ type: 'clearAll' }),
+      clearAll: () => {
+        saveRushPlan(null);
+        dispatch({ type: 'clearAll' });
+      },
     };
   }, [db]);
 

@@ -5,6 +5,7 @@ export type IconName =
   | 'habits'
   | 'report'
   | 'settings'
+  | 'clock'
   | 'plus'
   | 'chevron-left'
   | 'chevron-right'
@@ -54,6 +55,12 @@ const ICONS: Record<IconName, ReactNode> = {
       <path d="M4 8h8.5M17.5 8H20M4 16h4.5M13.5 16H20" />
       <circle cx="15" cy="8" r="2.3" />
       <circle cx="11" cy="16" r="2.3" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.2" />
+      <path d="M12 7.5V12l3.2 2" />
     </>
   ),
   plus: <path d="M12 5.5v13M5.5 12h13" />,

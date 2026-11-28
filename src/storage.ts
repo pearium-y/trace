@@ -50,6 +50,7 @@ export function createDefaultDB(lang: Lang = detectLang()): DB {
     records: {},
     notesEnabled: false,
     notes: [],
+    rushEnabled: false,
     activeProjectId: project.id,
     lang,
   };
@@ -204,6 +205,7 @@ export function parseDB(x: unknown): DB | null {
     if (note.habitId && !habitIds.has(note.habitId)) delete note.habitId;
   }
   const notesEnabled = x.notesEnabled === true;
+  const rushEnabled = x.rushEnabled === true;
 
   const activeProjectId =
     typeof x.activeProjectId === 'string' && projectIds.has(x.activeProjectId)
@@ -219,6 +221,7 @@ export function parseDB(x: unknown): DB | null {
     records,
     notesEnabled,
     notes,
+    rushEnabled,
     activeProjectId,
     lang,
   };
@@ -326,6 +329,7 @@ function migrateLegacyPayload(x: unknown): DB | null {
     records,
     notesEnabled: false,
     notes: [],
+    rushEnabled: false,
     activeProjectId: project.id,
     lang: 'zh',
   };
@@ -342,6 +346,7 @@ export function buildExport(db: DB): ExportPayload {
     records: db.records,
     notesEnabled: db.notesEnabled,
     notes: db.notes,
+    rushEnabled: db.rushEnabled,
     lang: db.lang,
   };
 }

@@ -1,19 +1,19 @@
 import type { Lang } from './types';
 
-export const APP_VERSION = '1.1.0-rc.4';
+export const APP_VERSION = '1.1.0-rc.5';
 
 /** 当前版本的发行注记 */
 export const RELEASE_NOTES: Record<Lang, string[]> = {
   zh: [
-    '清理无人使用的代码与国际化文案，统一项目、习惯与标签的查找逻辑。',
-    '复用标签胶囊和颜色选择器组件，并拆分项目管理相关组件，降低维护成本。',
-    '修复便签详情页在英文界面下日期仍显示中文的问题。',
-    '修复设置页「占用」在首次进入或数据变更后显示旧值的问题。',
+    '新增可选「快排」功能：把今天的习惯像搭积木一样按时间顺序排进时间轴。',
+    '支持拖拽排程、自动 5 分钟休息与可调长休息，以及完成打卡和时长调整。',
+    '支持把当日计划导出为 .ics 日历文件；计划仅保留当天，跨天自动清空。',
+    '可在设置中随时启用或关闭快排。',
   ],
   en: [
-    'Removed unused code and translation keys, and unified project / habit / tag lookup logic.',
-    'Reused shared tag chip and color picker components, and split the project management components to reduce maintenance cost.',
-    'Fixed the note detail date showing Chinese in the English interface.',
-    'Fixed the Settings storage usage showing a stale value on first load or after data changes.',
+    'Added an optional Rush feature to lay out today’s habits on a timeline in order.',
+    'Drag to schedule, automatic 5-minute rests and adjustable long breaks, completion checks and duration editing.',
+    'Export the day’s plan as an .ics calendar file; plans are kept for today only and clear automatically.',
+    'Enable or disable Rush anytime in Settings.',
   ],
 };

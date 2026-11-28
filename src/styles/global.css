@@ -112,6 +112,10 @@ input[type='number'] {
     max-width: 920px;
     padding: 34px 28px 52px;
   }
+
+  .page.rush-page {
+    max-width: 1120px;
+  }
 }
 
 /* 桌面侧栏 */
